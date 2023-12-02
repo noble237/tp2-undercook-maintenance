@@ -33,14 +33,32 @@ class Fridge(pygame.sprite.Sprite):
         """
         return self.__ingredient
 
+
+    ########################################## C4 ##########################################
+    
     def __build_surface(self) -> pygame.Surface:
         """
         Construit l'image représentant le réfrigérateur en fonction de l'ingrédient qu'il contient.
         :return: image du réfrigérateur
         """
-        surface = pygame.Surface((50, 40), flags=pygame.SRCALPHA)
+
+        suface_width = 50
+        suface_height = 40
+
+        surface = pygame.Surface((suface_width, suface_height), flags=pygame.SRCALPHA)
         surface.fill(settings.FRIDGE_COLOR)
 
-        self.__ingredient.draw(surface, (9, 10))
+        # Calculer la position centrée pour l'ingrédient
+        ingredient_width = self.__ingredient.width()
+        ingredient_height = self.__ingredient.height()
+
+        center_x = (suface_width - ingredient_width) / 2
+        center_y = (suface_height - ingredient_height) / 2
+
+        # Dessiner l'ingrédient à la position centrée
+        self.__ingredient.draw(surface, (center_x, center_y))
 
         return surface
+    
+
+    ########################################## C4 ##########################################
