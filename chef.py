@@ -278,8 +278,21 @@ class Chef(pygame.sprite.Sprite):
         Recalcule la position en fonction des déplacements demandés et de la vitesse de déplacement.
         :return: aucun
         """
-        self.rect.x += self.__walking[0] * self.__SPEED
-        self.rect.y += self.__walking[1] * self.__SPEED
+        new_x = self.rect.x + self.__walking[0] * self.__SPEED
+        new_y = self.rect.y + self.__walking[1] * self.__SPEED
+
+
+    ########################################## C2 ##########################################
+
+        # Limiter le mouvement pour empêcher le chef de sortir de l'écran
+        if 0 <= new_x <= settings.SCREEN_WIDTH - self.rect.width:
+            self.rect.x = new_x
+        if 0 <= new_y <= settings.SCREEN_HEIGHT - self.rect.height:
+            self.rect.y = new_y
+
+    ########################################## C2 ##########################################
+
+
 
     @property
     def food(self) -> Food or None:
