@@ -33,6 +33,16 @@ class Game:
         self.__screen = screen
         self.__running = False
 
+    ########################################## C3 ##########################################
+
+        self.is_moving_up = False
+        self.is_moving_down = False
+        self.is_moving_left = False
+        self.is_moving_right = False
+
+    ########################################## C3 ##########################################
+
+
         default_font_name = pygame.font.get_default_font()
         self.__font = pygame.font.Font(default_font_name, Game.__DEFAULT_FONT_SIZE)
 
@@ -171,15 +181,20 @@ class Game:
         :param event: événement du clavier
         :return: aucun
         """
+    ########################################## C3 ##########################################
+
         if event.type == pygame.KEYDOWN:
             if event.key in [pygame.K_s, pygame.K_DOWN]:
-                self.__chef.walk_down()
+                self.is_moving_down = True
             if event.key in [pygame.K_a, pygame.K_LEFT]:
-                self.__chef.walk_left()
+                self.is_moving_left = True
             if event.key in [pygame.K_d, pygame.K_RIGHT]:
-                self.__chef.walk_right()
+                self.is_moving_right = True
             if event.key in [pygame.K_w, pygame.K_UP]:
-                self.__chef.walk_up()
+                self.is_moving_up = True
+
+    ########################################## C3 ##########################################
+
             if event.key == pygame.K_SPACE:
                 if filling_station := pygame.sprite.spritecollideany(self.__chef, self.__filling_stations_group):
                     if not self.__chef.food:
@@ -222,12 +237,42 @@ class Game:
                 else:
                     self.__chef.deliver_meal(self.__order_board)
 
+    ########################################## C3 ##########################################
+
         if event.type == pygame.KEYUP:
             if event.key in [pygame.K_s, pygame.K_DOWN]:
-                self.__chef.stop_walking_down()
+                self.is_moving_down = False
             if event.key in [pygame.K_a, pygame.K_LEFT]:
-                self.__chef.stop_walking_left()
+                self.is_moving_left = False
             if event.key in [pygame.K_d, pygame.K_RIGHT]:
-                self.__chef.stop_walking_right()
+                self.is_moving_right = False
             if event.key in [pygame.K_w, pygame.K_UP]:
+                self.is_moving_up = False
+
+        self.__update_chef_movement()
+
+
+    ########################################## C3 ##########################################
+
+    def __update_chef_movement(self):
+            if self.is_moving_up:
+                self.__chef.walk_up()
+            else:
                 self.__chef.stop_walking_up()
+
+            if self.is_moving_down:
+                self.__chef.walk_down()
+            else:
+                self.__chef.stop_walking_down()
+
+            if self.is_moving_left:
+                self.__chef.walk_left()
+            else:
+                self.__chef.stop_walking_left()
+
+            if self.is_moving_right:
+                self.__chef.walk_right()
+            else:
+                self.__chef.stop_walking_right()
+
+    ########################################## C3 ##########################################
