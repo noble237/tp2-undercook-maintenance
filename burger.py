@@ -97,3 +97,11 @@ class Burger(Food):
         burger.add_ingredient(Ingredient(IngredientType.TOP_BUN))
 
         return burger
+    
+
+    ########################################## C1 ##########################################
+    @property
+    def ingredients(self) -> list:
+        return self.__ingredients
+
+    ########################################## C1 ##########################################

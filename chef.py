@@ -6,6 +6,7 @@ from food import Food
 from ingredients import Ingredient, IngredientType
 from meal import Meal
 from order_board import OrderBoard
+from orders import Order
 
 
 class Chef(pygame.sprite.Sprite):
@@ -41,6 +42,9 @@ class Chef(pygame.sprite.Sprite):
 
         self.__sprite_group = pygame.sprite.GroupSingle()
         self.__sprite_group.add(self)
+    
+
+    ########################################## C1 ##########################################
 
     def deliver_meal(self, order_board: OrderBoard) -> bool:
         """
@@ -55,11 +59,49 @@ class Chef(pygame.sprite.Sprite):
             return False
 
         if order := order_board.collides_with(self):
-            order_board.remove_order(order.order_id)
-            self.drop_food()
-            return True
+            # Vérifie si le repas correspond à la commande
+            if self.matches_order(self.__food, order):
+                order_board.remove_order(order.order_id)
+                self.drop_food()
+                return True
 
         return False
+
+    def matches_order(self, meal: Meal, order: Order) -> bool:
+        """
+        Vérifie si le repas correspond à la commande.
+        :param meal: le repas à vérifier
+        :param order: la commande à comparer
+        :return: True si le repas correspond à la commande, False sinon
+        """
+        # Comparaison Burger
+        if meal.burger is None or order.burger is None:
+            if meal.burger is not None or order.burger is not None:
+                return False  # Un a un burger et l'autre non
+        else:
+            types_meal_burger = {ingredient.ingredient_type() for ingredient in meal.burger.ingredients}
+            types_order_burger = {ingredient.ingredient_type() for ingredient in order.burger.ingredients}
+            if types_meal_burger != types_order_burger:
+                return False  # Ingrédients du burger ne correspondent pas
+
+        # Comparaison Frites
+        if (meal.fries is None) != (order.fries is None):
+            return False  # Une des commandes a des frites et l'autre non
+
+        # Comparaison Beverage
+        if meal.beverage is None or order.beverage is None:
+            if meal.beverage is not None or order.beverage is not None:
+                return False  # Une a une boisson et l'autre non
+        else:
+            if meal.beverage.color() != order.beverage.color():
+                return False  # Couleurs des boissons ne correspondent pas
+
+        return True
+
+
+
+    ########################################## C1 ##########################################
+
 
     def draw(self, surface: pygame.Surface) -> None:
         """

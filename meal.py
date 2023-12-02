@@ -60,3 +60,17 @@ class Meal(Food):
 
     def width(self) -> int:
         return self.__width
+    
+    ########################################## C1 ##########################################
+    @property
+    def burger(self) -> Burger or None:
+        return self.__burger
+
+    @property
+    def beverage(self) -> Beverage or None:
+        return self.__beverage
+
+    @property
+    def fries(self) -> Fries or None:
+        return self.__fries
+    ########################################## C1 ##########################################
