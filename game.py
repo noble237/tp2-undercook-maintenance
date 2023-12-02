@@ -255,24 +255,18 @@ class Game:
     ########################################## C3 ##########################################
 
     def __update_chef_movement(self):
-            if self.is_moving_up:
-                self.__chef.walk_up()
-            else:
-                self.__chef.stop_walking_up()
+        if self.is_moving_left:
+            self.__chef.move_horizontal(-1)
+        elif self.is_moving_right:
+            self.__chef.move_horizontal(1)
+        else:
+            self.__chef.move_horizontal(0)
 
-            if self.is_moving_down:
-                self.__chef.walk_down()
-            else:
-                self.__chef.stop_walking_down()
-
-            if self.is_moving_left:
-                self.__chef.walk_left()
-            else:
-                self.__chef.stop_walking_left()
-
-            if self.is_moving_right:
-                self.__chef.walk_right()
-            else:
-                self.__chef.stop_walking_right()
+        if self.is_moving_up:
+            self.__chef.move_vertical(-1)
+        elif self.is_moving_down:
+            self.__chef.move_vertical(1)
+        else:
+            self.__chef.move_vertical(0)
 
     ########################################## C3 ##########################################

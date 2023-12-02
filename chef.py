@@ -156,73 +156,53 @@ class Chef(pygame.sprite.Sprite):
 
         return self.__food.ingredient_type() == IngredientType.RAW_PATTY
 
-    def stop_walking_down(self) -> None:
+    def move_horizontal(self, direction):
         """
-        Arrête le déplacement du chef cuisinier en direction du bas de l'écran.
-        :return: aucun
+        Déplace le chef horizontalement.
+        :param direction: -1 pour gauche, 1 pour droite
         """
-        self.__walking = self.__walking[0], 0
+        self.__walking = direction, self.__walking[1]
+        self.__facing = Chef.__FACING_LEFT if direction < 0 else Chef.__FACING_RIGHT
 
-    def stop_walking_left(self) -> None:
+    def move_vertical(self, direction):
         """
-        Arrête le déplacement du chef cuisinier en direction de la gauche de l'écran.
-        :return: aucun
+        Déplace le chef verticalement.
+        :param direction: -1 pour haut, 1 pour bas
         """
-        self.__walking = 0, self.__walking[1]
+        self.__walking = self.__walking[0], direction
+        self.__facing = Chef.__FACING_UP if direction < 0 else Chef.__FACING_DOWN
 
-    def stop_walking_right(self) -> None:
-        """
-        Arrête le déplacement du chef cuisinier en direction de la droite de l'écran.
-        :return: aucun
-        """
-        self.__walking = 0, self.__walking[1]
+    ########################################## C3 ##########################################
 
-    def stop_walking_up(self) -> None:
-        """
-        Arrête le déplacement du chef cuisinier en direction du haut de l'écran.
-        :return: aucun
-        """
-        self.__walking = self.__walking[0], 0
-
-    def update(self) -> None:
+    def update(self):
         """
         Ajuste l'apparence et la position du chef cuisinier.
-        :return: aucun
         """
+        new_x = self.rect.x + self.__walking[0] * self.__SPEED
+        new_y = self.rect.y + self.__walking[1] * self.__SPEED
+
+    ########################################## C2 ##########################################
+        # Limiter le mouvement pour empêcher le chef de sortir de l'écran
+        if 0 <= new_x <= settings.SCREEN_WIDTH - self.rect.width:
+            self.rect.x = new_x
+        if 0 <= new_y <= settings.SCREEN_HEIGHT - self.rect.height:
+            self.rect.y = new_y
+
+    ########################################## C2 ##########################################
+
+        if self.__walking[0] < 0:
+            self.__facing = Chef.__FACING_LEFT
+        elif self.__walking[0] > 0:
+            self.__facing = Chef.__FACING_RIGHT
+        elif self.__walking[1] < 0:
+            self.__facing = Chef.__FACING_UP
+        elif self.__walking[1] > 0:
+            self.__facing = Chef.__FACING_DOWN
+
         self.image = self.__surfaces[self.__facing]
-        self.__walk()
 
-    def walk_down(self) -> None:
-        """
-        Initie un déplacement du chef cuisinier vers le bas de l'écran.
-        :return: aucun
-        """
-        self.__facing = Chef.__FACING_DOWN
-        self.__walking = self.__walking[0], 1
+    ########################################## C3 ##########################################
 
-    def walk_left(self) -> None:
-        """
-        Initie un déplacement du chef cuisinier vers la gauche de l'écran.
-        :return: aucun
-        """
-        self.__facing = Chef.__FACING_LEFT
-        self.__walking = -1, self.__walking[1]
-
-    def walk_right(self) -> None:
-        """
-        Initie un déplacement du chef cuisinier vers la droite de l'écran.
-        :return: aucun
-        """
-        self.__facing = Chef.__FACING_RIGHT
-        self.__walking = 1, self.__walking[1]
-
-    def walk_up(self) -> None:
-        """
-        Initie un déplacement du chef cuisinier vers le haut de l'écran.
-        :return: aucun
-        """
-        self.__facing = Chef.__FACING_UP
-        self.__walking = self.__walking[0], -1
 
     @staticmethod
     def __build_surfaces(food: Food = None) -> list:
@@ -272,26 +252,6 @@ class Chef(pygame.sprite.Sprite):
         pygame.draw.rect(surfaces[Chef.__FACING_LEFT], settings.SKIN_COLOR, skin_rect)
 
         return surfaces
-
-    def __walk(self) -> None:
-        """
-        Recalcule la position en fonction des déplacements demandés et de la vitesse de déplacement.
-        :return: aucun
-        """
-        new_x = self.rect.x + self.__walking[0] * self.__SPEED
-        new_y = self.rect.y + self.__walking[1] * self.__SPEED
-
-
-    ########################################## C2 ##########################################
-
-        # Limiter le mouvement pour empêcher le chef de sortir de l'écran
-        if 0 <= new_x <= settings.SCREEN_WIDTH - self.rect.width:
-            self.rect.x = new_x
-        if 0 <= new_y <= settings.SCREEN_HEIGHT - self.rect.height:
-            self.rect.y = new_y
-
-    ########################################## C2 ##########################################
-
 
 
     @property
