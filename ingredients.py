@@ -45,7 +45,10 @@ class Ingredient(Food):
                      IngredientType.ONION_SLICES: (settings.ONIONS_COLOR, 32, 3),
                      IngredientType.LETTUCE_SLICES: (settings.LETTUCE_COLOR, 32, 3),
                      IngredientType.TOMATO_SLICES: (settings.TOMATO_COLOR, 32, 3),
-                     IngredientType.PICKLE_SLICE: (settings.PICKLE_COLOR, 36, 3)}
+
+                     ########################################## C5 ##########################################
+                     IngredientType.PICKLE_SLICE: (settings.PICKLE_COLOR, 32, 3)} # on change a 32
+                     ########################################## C5 ##########################################
 
     # ingrédients qui sont optionnels dans la composition d'un hambourgeois
     __OPTIONS = [IngredientType.CHEESE_SLICE,
