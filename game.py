@@ -53,6 +53,7 @@ class Game:
         self.__order_board = OrderBoard()
 
         self.__colliding = []
+        self.__spacing = 55
 
         self.__trash = Trash((20, settings.SCREEN_HEIGHT - (Trash.HEIGHT + 20)))
 
@@ -60,36 +61,51 @@ class Game:
         self.__platters = [Platter((120, 200)), Platter((120, 300)), Platter((120, 400))]
         self.__platters_group.add(self.__platters)
 
+
+    ########################################## C6 ##########################################
+
         self.__filling_stations_group = pygame.sprite.Group()
-        self.__filling_stations = [FillingStation(BeverageType.COLA, (400, 200)),
-                                   FillingStation(BeverageType.ORANGE_SODA, (500, 200)),
-                                   FillingStation(BeverageType.LEMON_SODA, (600, 200)),
-                                   FillingStation(BeverageType.LEMONADE, (700, 200)),
-                                   FillingStation(BeverageType.PINK_LEMONADE, (800, 200))]
+        liste_brevages = [
+            BeverageType.COLA, BeverageType.ORANGE_SODA, BeverageType.LEMON_SODA,
+            BeverageType.LEMONADE, BeverageType.PINK_LEMONADE
+        ]
+        self.__filling_stations = [
+            FillingStation(liste_brevages[i], (((400 + 800) // 2) + (i - len(liste_brevages) // 2) * self.__spacing, 200))
+            for i in range(len(liste_brevages))
+        ]
         self.__filling_stations_group.add(self.__filling_stations)
 
+
         self.__fryers_group = pygame.sprite.Group()
-        self.__fryers = [Fryer((settings.SCREEN_WIDTH - (Fryer.WIDTH + 200), 400)),
-                         Fryer((settings.SCREEN_WIDTH - (Fryer.WIDTH + 200), 475))]
+        self.__fryers = [
+            Fryer((settings.SCREEN_WIDTH - (Fryer.WIDTH + 200), ((400 + 475) // 2) + (i - 1) * self.__spacing))
+            for i in range(2)
+        ]
         self.__fryers_group.add(self.__fryers)
 
         self.__grills_group = pygame.sprite.Group()
-        self.__grills = [Grill((settings.SCREEN_WIDTH - (Grill.WIDTH + 200), 150)),
-                         Grill((settings.SCREEN_WIDTH - (Grill.WIDTH + 200), 225)),
-                         Grill((settings.SCREEN_WIDTH - (Grill.WIDTH + 200), 300))]
+        self.__grills = [
+            Grill((settings.SCREEN_WIDTH - (Grill.WIDTH + 200), ((150 + 300) // 2) + (i - 1) * self.__spacing))
+            for i in range(3)
+        ]
         self.__grills_group.add(self.__grills)
 
+    ########################################## C6 ##########################################
+
+
         self.__fridges_group = pygame.sprite.Group()
-        self.__fridges = [Fridge(Ingredient(IngredientType.BOTTOM_BUN), (220, settings.SCREEN_HEIGHT - 60)),
-                          Fridge(Ingredient(IngredientType.TOP_BUN), (320, settings.SCREEN_HEIGHT - 60)),
-                          Fridge(Ingredient(IngredientType.RAW_PATTY), (420, settings.SCREEN_HEIGHT - 60)),
-                          Fridge(Ingredient(IngredientType.CHEESE_SLICE), (520, settings.SCREEN_HEIGHT - 60)),
-                          Fridge(Ingredient(IngredientType.ONION_SLICES), (620, settings.SCREEN_HEIGHT - 60)),
-                          Fridge(Ingredient(IngredientType.LETTUCE_SLICES), (720, settings.SCREEN_HEIGHT - 60)),
-                          Fridge(Ingredient(IngredientType.TOMATO_SLICES), (820, settings.SCREEN_HEIGHT - 60)),
-                          Fridge(Ingredient(IngredientType.PICKLE_SLICE), (920, settings.SCREEN_HEIGHT - 60)),
-                          Fridge(Ingredient(IngredientType.POTATO), (1020, settings.SCREEN_HEIGHT - 60))]
+        liste_ingredients = [
+            IngredientType.BOTTOM_BUN, IngredientType.TOP_BUN, IngredientType.RAW_PATTY,
+            IngredientType.CHEESE_SLICE, IngredientType.ONION_SLICES, IngredientType.LETTUCE_SLICES,
+            IngredientType.TOMATO_SLICES, IngredientType.PICKLE_SLICE, IngredientType.POTATO
+        ]
+        self.__fridges = [
+            Fridge(Ingredient(liste_ingredients[i]), (((220 + 1020) // 2) + (i - len(liste_ingredients) // 2) * self.__spacing, settings.SCREEN_HEIGHT - 60))
+            for i in range(len(liste_ingredients))
+        ]
         self.__fridges_group.add(self.__fridges)
+
+
 
         self.__assembly_stations_group = pygame.sprite.Group()
         self.__assembly_stations = [AssemblyStation((400, 500)),
