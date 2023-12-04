@@ -47,7 +47,7 @@ class Ingredient(Food):
                      IngredientType.TOMATO_SLICES: (settings.TOMATO_COLOR, 32, 3),
 
                      ########################################## C5 ##########################################
-                     IngredientType.PICKLE_SLICE: (settings.PICKLE_COLOR, 32, 3)} # on change a 32
+                     IngredientType.PICKLE_SLICE: (settings.PICKLE_COLOR, 32, 3)} # Changement a 32
                      ########################################## C5 ##########################################
 
     # ingrédients qui sont optionnels dans la composition d'un hambourgeois

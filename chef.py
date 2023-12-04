@@ -172,7 +172,7 @@ class Chef(pygame.sprite.Sprite):
         self.__walking = self.__walking[0], direction
         self.__facing = Chef.__FACING_UP if direction < 0 else Chef.__FACING_DOWN
 
-    ########################################## C3 ##########################################
+    ########################################## C2 et C3 ##########################################
 
     def update(self):
         """
@@ -201,7 +201,7 @@ class Chef(pygame.sprite.Sprite):
 
         self.image = self.__surfaces[self.__facing]
 
-    ########################################## C3 ##########################################
+    ########################################## C2 et C3 ##########################################
 
 
     @staticmethod

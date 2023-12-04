@@ -15,6 +15,7 @@ from beverage import BeverageType
 from ingredients import Ingredient, IngredientType
 
 import orders
+import math
 
 
 class Game:
@@ -157,17 +158,125 @@ class Game:
             for order in new_orders:
                 order.start()
 
+    ########################################## C6 ##########################################
+
+    def calculate_distance(self, pos1, pos2):
+        """Calcule la distance entre deux points."""
+        return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
+
+    def get_relevant_equipments(self):
+        if self.__chef.has_potato():
+            return list(self.__fryers_group)
+        elif self.__chef.has_raw_patty():
+            return list(self.__grills_group)
+        else:
+            return list(self.__fryers_group) + list(self.__fryers_group) + \
+                list(self.__fridges_group) + list(self.__filling_stations_group) + \
+                list(self.__assembly_stations_group) + list(self.__platters_group) + \
+                    [self.__trash]
+
+    def get_closest_available_equipment(self, only_equipement):
+        chef_pos = self.__chef.rect.center
+
+        if only_equipement:
+            relevant_equipments = only_equipement
+        else:
+            relevant_equipments = self.get_relevant_equipments()
+
+
+        closest = None
+        min_distance = float('inf')
+
+        for equipment in relevant_equipments:
+            distance = self.calculate_distance(chef_pos, equipment.rect.center)
+            if distance < min_distance:
+                if isinstance(equipment, (Fryer, Grill)) and not equipment.is_available():
+                    continue
+                min_distance = distance
+                closest = equipment
+
+        # Retourner la poubelle si aucun équipement disponible n'est trouvé pour des cas
+        if closest is None and (self.__chef.has_potato() or self.__chef.has_raw_patty()):
+            return self.__trash
+        else:
+            return closest
+
+    def interact_with_closest_equipment(self, equipment):
+        if isinstance(equipment, FillingStation):
+            self.interact_with_filling_station(equipment)
+        elif isinstance(equipment, Fryer):
+            self.interact_with_fryer(equipment)
+        elif isinstance(equipment, Grill):
+            self.interact_with_grill(equipment)
+        elif isinstance(equipment, Fridge):
+            self.interact_with_fridge(equipment)
+        elif isinstance(equipment, AssemblyStation):
+            self.interact_with_assembly_station(equipment)
+        elif isinstance(equipment, Platter):
+            self.interact_with_platter(equipment)
+        elif isinstance(equipment, Trash):
+            self.interact_with_trash(self.__chef)
+
+    def interact_with_filling_station(self, filling_station):
+        if not self.__chef.food:
+            if filling_station.is_available():
+                self.__chef.drop_food()
+                filling_station.fill()
+            else:
+                self.__chef.grab_food(filling_station.get_beverage())
+
+    def interact_with_fryer(self, fryer):
+        if fryer.is_available() and self.__chef.has_potato():
+            self.__chef.drop_food()
+            fryer.fry()
+        elif not self.__chef.food:
+            self.__chef.grab_food(fryer.get_fries())
+        
+
+    def interact_with_grill(self, grill):
+        if grill.is_available() and self.__chef.has_raw_patty():
+            food = self.__chef.drop_food()
+            grill.cook(food)
+        elif grill.has_cooked_patty() and not self.__chef.food:
+            food = grill.get_patty()
+            self.__chef.grab_food(food)
+
+    def interact_with_fridge(self, fridge):
+        self.__chef.grab_food(fridge.get_food())
+
+    def interact_with_assembly_station(self, assembly_station):
+        if self.__chef.food:
+            if assembly_station.add_ingredient(self.__chef.food):
+                self.__chef.drop_food()
+        else:
+            food = assembly_station.get_burger()
+            self.__chef.grab_food(food)
+
+    def interact_with_platter(self, platter):
+        if self.__chef.food:
+            if platter.add_food(self.__chef.food):
+                self.__chef.drop_food()
+        else:
+            food = platter.get_meal()
+            self.__chef.grab_food(food)
+
+    def interact_with_trash(self, chef):
+        chef.drop_food()
+
+    def interact_with_orderboard(self, orderboard):
+        self.__chef.deliver_meal(orderboard)
+
     def __handle_pygame_events(self) -> None:
         """
         Gère les événements envoyés par Pygame.
         :return: aucun
         """
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.__running = False
                 return
 
-            # interception de la touche ESCAPE à ce niveau-ci pour arrêter la boucle au besoin
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.__running = False
                 return
@@ -175,82 +284,95 @@ class Game:
             if event.type in [pygame.KEYDOWN, pygame.KEYUP]:
                 self.__handle_keyboard_event(event)
 
+
+
+    ########################################## C6 ##########################################
+
+    ########################################## C3 et C6 ##########################################
     def __handle_keyboard_event(self, event: pygame.event.Event) -> None:
         """
         Gère les événements associés aux touches du clavier.
         :param event: événement du clavier
         :return: aucun
         """
-    ########################################## C3 ##########################################
 
         if event.type == pygame.KEYDOWN:
             if event.key in [pygame.K_s, pygame.K_DOWN]:
                 self.is_moving_down = True
-            if event.key in [pygame.K_a, pygame.K_LEFT]:
+            elif event.key in [pygame.K_a, pygame.K_LEFT]:
                 self.is_moving_left = True
-            if event.key in [pygame.K_d, pygame.K_RIGHT]:
+            elif event.key in [pygame.K_d, pygame.K_RIGHT]:
                 self.is_moving_right = True
-            if event.key in [pygame.K_w, pygame.K_UP]:
+            elif event.key in [pygame.K_w, pygame.K_UP]:
                 self.is_moving_up = True
-
-    ########################################## C3 ##########################################
-
-            if event.key == pygame.K_SPACE:
-                if filling_station := pygame.sprite.spritecollideany(self.__chef, self.__filling_stations_group):
-                    if not self.__chef.food:
-                        if filling_station.is_available():
-                            self.__chef.drop_food()
-                            filling_station.fill()
-                        else:
-                            self.__chef.grab_food(filling_station.get_beverage())
-                elif fryer := pygame.sprite.spritecollideany(self.__chef, self.__fryers_group):
-                    if fryer.is_available() and self.__chef.has_potato():
-                        self.__chef.drop_food()
-                        fryer.fry()
-                    elif not self.__chef.food:
-                        self.__chef.grab_food(fryer.get_fries())
-                elif grill := pygame.sprite.spritecollideany(self.__chef, self.__grills_group):
-                    if grill.is_available() and self.__chef.has_raw_patty():
-                        food = self.__chef.drop_food()
-                        grill.cook(food)
-                    elif grill.has_cooked_patty() and not self.__chef.food:
-                        food = grill.get_patty()
-                        self.__chef.grab_food(food)
-                elif fridge := pygame.sprite.spritecollideany(self.__chef, self.__fridges_group):
-                    self.__chef.grab_food(fridge.get_food())
-                elif assembly_station := pygame.sprite.spritecollideany(self.__chef, self.__assembly_stations_group):
-                    if self.__chef.food:
-                        if assembly_station.add_ingredient(self.__chef.food):
-                            self.__chef.drop_food()
-                    else:
-                        food = assembly_station.get_burger()
-                        self.__chef.grab_food(food)
-                elif platter := pygame.sprite.spritecollideany(self.__chef, self.__platters_group):
-                    if self.__chef.food:
-                        if platter.add_food(self.__chef.food):
-                            self.__chef.drop_food()
-                    else:
-                        food = platter.get_meal()
-                        self.__chef.grab_food(food)
-                elif pygame.sprite.collide_rect(self.__chef, self.__trash):
-                    self.__chef.drop_food()
-                else:
-                    self.__chef.deliver_meal(self.__order_board)
-
-    ########################################## C3 ##########################################
+            elif event.key == pygame.K_SPACE:
+                self.handle_space_key()
 
         if event.type == pygame.KEYUP:
             if event.key in [pygame.K_s, pygame.K_DOWN]:
                 self.is_moving_down = False
-            if event.key in [pygame.K_a, pygame.K_LEFT]:
+            elif event.key in [pygame.K_a, pygame.K_LEFT]:
                 self.is_moving_left = False
-            if event.key in [pygame.K_d, pygame.K_RIGHT]:
+            elif event.key in [pygame.K_d, pygame.K_RIGHT]:
                 self.is_moving_right = False
-            if event.key in [pygame.K_w, pygame.K_UP]:
+            elif event.key in [pygame.K_w, pygame.K_UP]:
                 self.is_moving_up = False
 
         self.__update_chef_movement()
+    
+    def handle_space_key(self):
+        interacted = False
+        filling_station = pygame.sprite.spritecollideany(self.__chef, self.__filling_stations_group)
+        fryer = pygame.sprite.spritecollideany(self.__chef, self.__fryers_group)
+        grill = pygame.sprite.spritecollideany(self.__chef, self.__grills_group)
+        fridge = pygame.sprite.spritecollideany(self.__chef, self.__fridges_group)
+        assembly_station = pygame.sprite.spritecollideany(self.__chef, self.__assembly_stations_group)
+        platter = pygame.sprite.spritecollideany(self.__chef, self.__platters_group)
+        trash = pygame.sprite.collide_rect(self.__chef, self.__trash)
 
+        # Vérifier les interactions directes avec chaque type d'équipement
+        if filling_station:
+            self.interact_with_filling_station(filling_station)
+            interacted = True
+        elif fryer:
+            self.interact_with_fryer(fryer)
+            interacted = True
+        elif grill:
+            self.interact_with_grill(grill)
+            interacted = True
+        elif fridge:
+            only_equipement = None
+            if self.__chef.has_raw_patty():
+                only_equipement = list(self.__grills_group)
+            elif self.__chef.has_potato():
+                only_equipement = list(self.__fryers_group)
+
+            if only_equipement:
+                closest_equipment = self.get_closest_available_equipment(only_equipement)
+                if closest_equipment:
+                    self.interact_with_closest_equipment(closest_equipment)
+            else:
+                self.interact_with_fridge(fridge)
+            interacted = True
+        elif assembly_station:
+            self.interact_with_assembly_station(assembly_station)
+            interacted = True
+        elif platter:
+            self.interact_with_platter(platter)
+            interacted = True
+        elif trash:
+            self.interact_with_trash(self.__chef)
+            interacted = True
+        else:
+            self.interact_with_orderboard(self.__order_board)
+
+        # Si aucune interaction directe n'a eu lieu, trouver l'équipement le plus proche
+        if not interacted:
+            closest_equipment = self.get_closest_available_equipment(None)
+            if closest_equipment:
+                self.interact_with_closest_equipment(closest_equipment)
+
+    ########################################## C3 et C6 ##########################################
 
     ########################################## C3 ##########################################
 
