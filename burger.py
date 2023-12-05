@@ -25,15 +25,6 @@ class Burger(Food):
     def __repr__(self) -> str:
         return str([i.ingredient_type() for i in self.__ingredients])
 
-    def add_ingredient(self, ingredient: Ingredient) -> None:
-        """
-        Ajoute un ingrédient au hambourgeois.
-        :param ingredient: ingrédient à ajouter
-        :return: aucun
-        """
-        self.__ingredients.append(ingredient)
-        self.__width, self.__height = self.__compute_width_and_height()
-
     def add_ingredients(self, ingredients: list) -> None:
         """
         Ajoute plusieurs ingrédients au hambourgeois.
@@ -42,6 +33,44 @@ class Burger(Food):
         """
         self.__ingredients.extend(ingredients)
         self.__width, self.__height = self.__compute_width_and_height()
+
+    
+    ########################################## A1 ##########################################
+
+    def add_ingredient(self, ingredient: Ingredient) -> None:
+        """
+        Ajoute un ingrédient au hambourgeois.
+        :param ingredient: ingrédient à ajouter
+        :return: aucun
+        """
+        if self.can_add_ingredient(ingredient):
+            self.__ingredients.append(ingredient)
+            self.__width, self.__height = self.__compute_width_and_height()
+
+    def can_add_ingredient(self, ingredient: Ingredient):
+        # Vérification si l'ingrédient est autorisé pour les burgers
+        if not ingredient.is_for_burger():
+            return False
+
+        # Le premier ingrédient doit être un BOTTOM_BUN
+        if len(self.__ingredients) == 0:
+            return ingredient.ingredient_type() == IngredientType.BOTTOM_BUN
+
+        # En deuxième position, il doit y avoir un COOKED_PATTY si le premier ingrédient est un BOTTOM_BUN
+        if len(self.__ingredients) == 1 and self.__ingredients[0].ingredient_type() == IngredientType.BOTTOM_BUN:
+            return ingredient.ingredient_type() == IngredientType.COOKED_PATTY
+        
+        # En quatrieme position, il doit ne doit pas avoir un autre COOKED_PATTY
+        if len(self.__ingredients) == 3:
+            return not ingredient.ingredient_type() == IngredientType.COOKED_PATTY
+
+        # Empêcher l'ajout de tout autre ingrédient si un TOP_BUN est déjà présent
+        if any(ingr.ingredient_type() == IngredientType.TOP_BUN for ingr in self.__ingredients):
+            return False
+
+        return True
+
+    ########################################## A1 ##########################################
 
     def draw(self, surface: pygame.Surface, pos: tuple) -> None:
         """

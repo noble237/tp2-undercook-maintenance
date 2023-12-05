@@ -3,7 +3,8 @@ import pygame
 import settings
 
 from burger import Burger
-from ingredients import Ingredient
+from ingredients import Ingredient, IngredientType
+
 
 
 class AssemblyStation(pygame.sprite.Sprite):
@@ -26,6 +27,9 @@ class AssemblyStation(pygame.sprite.Sprite):
         self.rect.x = pos[0] - self.rect.width / 2
         self.rect.y = pos[1] - self.rect.height / 2
 
+
+    ########################################## A1 ##########################################
+
     def add_ingredient(self, ingredient: Ingredient) -> bool:
         """
         Ajoute un ingrédient au hambourgeois en cours d'assemblage.
@@ -35,20 +39,29 @@ class AssemblyStation(pygame.sprite.Sprite):
         if isinstance(ingredient, Ingredient) and ingredient.is_for_burger():
             if not self.__burger:
                 self.__burger = Burger()
-            self.__burger.add_ingredient(ingredient)
-            self.image = self.__build_surface()
-            return True
+
+            if self.__burger.can_add_ingredient(ingredient):
+                self.__burger.add_ingredient(ingredient)
+                self.image = self.__build_surface()
+                return True
 
         return False
 
     def get_burger(self) -> Burger or None:
         """
-        Retire le hambourgeois de la station d'assemblage.
-        :return: hambourgeois assemblé, None s'il n'y en a pas
+        Retire le hambourgeois de la station d'assemblage si le dernier ingrédient est un TOP_BUN.
+        :return: hambourgeois assemblé s'il est complet, None sinon
         """
-        burger, self.__burger = self.__burger, None
-        self.image = self.__build_surface()
-        return burger
+        if self.__burger and self.__burger.ingredients and self.__burger.ingredients[-1].ingredient_type() == IngredientType.TOP_BUN:
+            burger, self.__burger = self.__burger, None
+            self.image = self.__build_surface()
+            return burger
+
+        return None
+
+    
+    ########################################## A1 ##########################################
+
 
     def __build_surface(self) -> pygame.Surface:
         """
