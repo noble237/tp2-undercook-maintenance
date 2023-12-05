@@ -57,16 +57,17 @@ class Burger(Food):
             return ingredient.ingredient_type() == IngredientType.BOTTOM_BUN
 
         # En deuxième position, il doit y avoir un COOKED_PATTY si le premier ingrédient est un BOTTOM_BUN
-        if len(self.__ingredients) == 1 and self.__ingredients[0].ingredient_type() == IngredientType.BOTTOM_BUN:
+        if len(self.__ingredients) == 1:
             return ingredient.ingredient_type() == IngredientType.COOKED_PATTY
         
-        # En quatrieme position, il doit ne doit pas avoir un autre COOKED_PATTY
-        if len(self.__ingredients) == 3:
-            return not ingredient.ingredient_type() == IngredientType.COOKED_PATTY
-
         # Empêcher l'ajout de tout autre ingrédient si un TOP_BUN est déjà présent
         if any(ingr.ingredient_type() == IngredientType.TOP_BUN for ingr in self.__ingredients):
             return False
+        
+        # En quatrieme position, il doit ne doit pas avoir d'autre COOKED_PATTY
+        if len(self.__ingredients) > 2:
+            return not ingredient.ingredient_type() == IngredientType.COOKED_PATTY
+
 
         return True
 
