@@ -35,7 +35,7 @@ class Burger(Food):
         self.__width, self.__height = self.__compute_width_and_height()
 
     
-    ########################################## A1 ##########################################
+    ########################################## A1 et A2 ##########################################
 
     def add_ingredient(self, ingredient: Ingredient) -> None:
         """
@@ -52,26 +52,34 @@ class Burger(Food):
         if not ingredient.is_for_burger():
             return False
 
-        # Le premier ingrédient doit être un BOTTOM_BUN
+        # Le premier ingrédient doit être un BOTTOM_BUN et seulement un seul BOTTOM_BUN est autorisé
         if len(self.__ingredients) == 0:
             return ingredient.ingredient_type() == IngredientType.BOTTOM_BUN
+        elif ingredient.ingredient_type() == IngredientType.BOTTOM_BUN:
+            return False
 
-        # En deuxième position, il doit y avoir un COOKED_PATTY si le premier ingrédient est un BOTTOM_BUN
-        if len(self.__ingredients) == 1:
-            return ingredient.ingredient_type() == IngredientType.COOKED_PATTY
-        
         # Empêcher l'ajout de tout autre ingrédient si un TOP_BUN est déjà présent
+        # seulement un seul TOP_BUN est autorisé
         if any(ingr.ingredient_type() == IngredientType.TOP_BUN for ingr in self.__ingredients):
             return False
-        
-        # En quatrieme position, il doit ne doit pas avoir d'autre COOKED_PATTY
-        if len(self.__ingredients) > 2:
-            return not ingredient.ingredient_type() == IngredientType.COOKED_PATTY
+        elif len(self.__ingredients) == 1 and ingredient.ingredient_type() == IngredientType.TOP_BUN:
+            return False
+
+        # Empêcher l'ajout d'un COOKED_PATTY si 3 ingrédients ou plus sont déjà présents
+        if len(self.__ingredients) >= 3 and ingredient.ingredient_type() == IngredientType.COOKED_PATTY:
+            return False
+
+        # Ajouter CHEESE_SLICE ou autre ingrédient uniquement si le dernier ingrédient est COOKED_PATTY
+        if ingredient.ingredient_type() == IngredientType.CHEESE_SLICE:
+            return len(self.__ingredients) > 0 and self.__ingredients[-1].ingredient_type() == IngredientType.COOKED_PATTY
+        elif ingredient.ingredient_type() == IngredientType.CHEESE_SLICE:
+            return False
 
 
         return True
 
-    ########################################## A1 ##########################################
+
+    ########################################## A1 et A2 ##########################################
 
     def draw(self, surface: pygame.Surface, pos: tuple) -> None:
         """
@@ -107,6 +115,8 @@ class Burger(Food):
 
         return width, height
 
+    ########################################## A2 ##########################################
+
     @classmethod
     def random(cls) -> typing.Self:
         """
@@ -122,13 +132,24 @@ class Burger(Food):
             burger.add_ingredient(Ingredient(IngredientType.COOKED_PATTY))
 
         if ingredients := Ingredient.random_burger_options():
-            burger.add_ingredients(ingredients)
+            # Séparer le fromage des autres ingrédients
+            cheese_slices = [ingr for ingr in ingredients if ingr.ingredient_type() == IngredientType.CHEESE_SLICE]
+            other_ingredients = [ingr for ingr in ingredients if ingr.ingredient_type() != IngredientType.CHEESE_SLICE]
+
+            # Ajouter d'abord le fromage, si présent
+            for cheese in cheese_slices:
+                burger.add_ingredient(cheese)
+
+            # Ajouter ensuite les autres ingrédients
+            burger.add_ingredients(other_ingredients)
+
 
         burger.add_ingredient(Ingredient(IngredientType.TOP_BUN))
 
         return burger
     
-
+    ########################################## A2 ##########################################
+    
     ########################################## C1 ##########################################
     @property
     def ingredients(self) -> list:
