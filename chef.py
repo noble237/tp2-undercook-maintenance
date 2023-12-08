@@ -19,7 +19,7 @@ class Chef(pygame.sprite.Sprite):
     __FACING_DOWN = 2
     __FACING_LEFT = 3
 
-    __SPEED = 2
+    __SPEED = 3
 
     def __init__(self, pos: tuple) -> None:
         """
@@ -130,7 +130,7 @@ class Chef(pygame.sprite.Sprite):
             self.__food = food
             self.__surfaces = self.__build_surfaces(self.__food)
 
-    def has_potato(self) -> bool:
+    def has_potato_slices(self) -> bool:
         """
         Vérifie si le chef cuisinier tient une patate dans ses mains.
         :return: True si le chef cuisinier tient une patate, False sinon
@@ -141,7 +141,7 @@ class Chef(pygame.sprite.Sprite):
         if not isinstance(self.__food, Ingredient):
             return False
 
-        return self.__food.ingredient_type() == IngredientType.POTATO
+        return self.__food.ingredient_type() == IngredientType.POTATO_SLICES
 
     def has_raw_patty(self) -> bool:
         """
@@ -155,6 +155,24 @@ class Chef(pygame.sprite.Sprite):
             return False
 
         return self.__food.ingredient_type() == IngredientType.RAW_PATTY
+    
+
+    ########################################## A5 ##########################################
+
+    def has_ingredient_for_cutting(self) -> bool:
+        """
+        Vérifie si le chef cuisinier tient une boulette de viande crue dans ses mains.
+        :return: True si le chef cuisinier tient une boulette de viande crue, False sinon
+        """
+        if not self.__food:
+            return False
+
+        if not isinstance(self.__food, Ingredient):
+            return False
+
+        return self.__food.is_for_cutting()
+    
+    ########################################## A5 ##########################################
 
     def move_horizontal(self, direction):
         """

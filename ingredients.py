@@ -25,6 +25,7 @@ class IngredientType(Enum):
     LETTUCE_SLICES = auto(),
     TOMATO_SLICES = auto(),
     PICKLE_SLICE = auto(),
+    POTATO_SLICES = auto(),
 
 
 class Ingredient(Food):
@@ -47,8 +48,9 @@ class Ingredient(Food):
                      IngredientType.TOMATO_SLICES: (settings.TOMATO_COLOR, 32, 3),
 
                      ########################################## C5 ##########################################
-                     IngredientType.PICKLE_SLICE: (settings.PICKLE_COLOR, 32, 3)} # Changement a 32
+                     IngredientType.PICKLE_SLICE: (settings.PICKLE_COLOR, 32, 3), # Changement a 32
                      ########################################## C5 ##########################################
+                     IngredientType.POTATO_SLICES: (settings.POTATO_COLOR, 16, 16)}
 
     # ingrédients qui sont optionnels dans la composition d'un hambourgeois
     __OPTIONS = [IngredientType.CHEESE_SLICE,
@@ -62,6 +64,12 @@ class Ingredient(Food):
                             IngredientType.BOTTOM_BUN,
                             IngredientType.COOKED_PATTY,
                             *__OPTIONS]
+    
+    __CUTTING_INGREDIENTS = [IngredientType.POTATO,
+                 IngredientType.UNPREPARED_ONION,
+                 IngredientType.UNPREPARED_LETTUCE,
+                 IngredientType.UNPREPARED_TOMATO,
+                 IngredientType.UNPREPARED_PICKLE]
 
     def __init__(self, ingredient_type: IngredientType) -> None:
         """
@@ -120,10 +128,30 @@ class Ingredient(Food):
             case IngredientType.PICKLE_SLICE:
                 rect = pygame.Rect((pos[0] - 2, pos[1]), (36, self.__height))
                 pygame.draw.rect(surface, self.__color, rect)
+
+        ########################################## A5 ##########################################
+
+            case IngredientType.POTATO_SLICES:
+                base_color = settings.POTATO_COLOR
+                for i in range(random.randint(5, 10)):
+                    x = pos[0] + random.randint(0, 20)
+                    y = pos[1] + random.randint(-5, 5)
+
+                    width = 2
+                    height = random.randint(5, 20)
+
+                    color_variation = [random.randint(-10, 10) for _ in range(3)]
+                    frite_color = [max(0, min(255, base_color[i] + color_variation[i])) for i in range(3)]
+
+                    frite_rect = pygame.Rect((x, y), (width, height))
+                    pygame.draw.rect(surface, frite_color, frite_rect)
+
+        ########################################## A5 ##########################################
+
             case _:
                 rect = pygame.Rect(pos, (32, self.__height))
                 pygame.draw.rect(surface, self.__color, rect)
-
+        
     def height(self) -> int:
         return self.__height
 
@@ -138,6 +166,10 @@ class Ingredient(Food):
         :return: True si l'ingrédient est permis, False sinon
         """
         return self.__type in Ingredient.__BURGER_INGREDIENTS
+    
+
+    def is_for_cutting(self) -> bool:
+        return self.__type in Ingredient.__CUTTING_INGREDIENTS
 
     def width(self) -> int:
         return self.__width

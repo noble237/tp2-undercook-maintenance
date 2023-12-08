@@ -17,6 +17,9 @@ from ingredients import Ingredient, IngredientType
 import orders
 import math
 
+from cutting_station import CuttingStation
+
+
 
 class Game:
     """
@@ -78,34 +81,31 @@ class Game:
 
         self.__fryers_group = pygame.sprite.Group()
         self.__fryers = [
-            Fryer((settings.SCREEN_WIDTH - (Fryer.WIDTH + 200), ((400 + 475) // 2) + (i - 1) * self.__spacing))
+            Fryer((settings.SCREEN_WIDTH - (Fryer.WIDTH + 200), ((317.5 + 400) // 2) + (i - 1) * self.__spacing))
             for i in range(2)
         ]
         self.__fryers_group.add(self.__fryers)
 
         self.__grills_group = pygame.sprite.Group()
         self.__grills = [
-            Grill((settings.SCREEN_WIDTH - (Grill.WIDTH + 200), ((150 + 300) // 2) + (i - 1) * self.__spacing))
+            Grill((settings.SCREEN_WIDTH - (Grill.WIDTH + 200), ((100 + 250) // 2) + (i - 1) * self.__spacing))
             for i in range(3)
         ]
         self.__grills_group.add(self.__grills)
 
     ########################################## C6 ##########################################
 
-
         self.__fridges_group = pygame.sprite.Group()
         liste_ingredients = [
             IngredientType.BOTTOM_BUN, IngredientType.TOP_BUN, IngredientType.RAW_PATTY,
-            IngredientType.CHEESE_SLICE, IngredientType.ONION_SLICES, IngredientType.LETTUCE_SLICES,
-            IngredientType.TOMATO_SLICES, IngredientType.PICKLE_SLICE, IngredientType.POTATO
+            IngredientType.CHEESE_SLICE, IngredientType.UNPREPARED_ONION, IngredientType.UNPREPARED_LETTUCE,
+            IngredientType.UNPREPARED_TOMATO, IngredientType.UNPREPARED_PICKLE, IngredientType.POTATO
         ]
         self.__fridges = [
             Fridge(Ingredient(liste_ingredients[i]), (((220 + 1020) // 2) + (i - len(liste_ingredients) // 2) * self.__spacing, settings.SCREEN_HEIGHT - 60))
             for i in range(len(liste_ingredients))
         ]
         self.__fridges_group.add(self.__fridges)
-
-
 
         self.__assembly_stations_group = pygame.sprite.Group()
         self.__assembly_stations = [AssemblyStation((400, 500)),
@@ -116,6 +116,16 @@ class Game:
         self.__assembly_stations_group.add(self.__assembly_stations)
 
         self.__chef = Chef((screen.get_width() / 2, screen.get_height() / 2))
+
+
+
+        self.__cutting_stations_group = pygame.sprite.Group()
+        self.__cutting_stations = [
+            CuttingStation((settings.SCREEN_WIDTH - (CuttingStation.WIDTH + 200), ((300 + 700) // 2) + (i - 1) * 70))
+            for i in range(4)
+        ]
+        self.__cutting_stations_group.add(self.__cutting_stations)
+        
 
     def run(self) -> None:
         """ Boucle de jeu. """
@@ -137,6 +147,8 @@ class Game:
 
         self.__order_board.update()
         self.__grills_group.update()
+        self.__fryers_group.update()
+        self.__cutting_stations_group.update()
         self.__chef.update()
 
     def __draw(self) -> None:
@@ -152,7 +164,9 @@ class Game:
         self.__fridges_group.draw(self.__screen)
         self.__assembly_stations_group.draw(self.__screen)
         self.__order_board.draw(self.__screen)
+        self.__cutting_stations_group.draw(self.__screen)
         self.__chef.draw(self.__screen)
+
         # self.__show_fps()
 
         pygame.display.flip()
@@ -181,15 +195,17 @@ class Game:
         return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
 
     def get_relevant_equipments(self):
-        if self.__chef.has_potato():
+        if self.__chef.has_potato_slices():
             return list(self.__fryers_group)
         elif self.__chef.has_raw_patty():
             return list(self.__grills_group)
+        elif self.__chef.has_ingredient_for_cutting():
+            return list(self.__cutting_stations_group)
         else:
             return list(self.__fryers_group) + list(self.__fryers_group) + \
                 list(self.__fridges_group) + list(self.__filling_stations_group) + \
                 list(self.__assembly_stations_group) + list(self.__platters_group) + \
-                    [self.__trash]
+                list(self.__cutting_stations_group) + [self.__trash]
 
     def get_closest_available_equipment(self, only_equipement):
         chef_pos = self.__chef.rect.center
@@ -212,7 +228,7 @@ class Game:
                 closest = equipment
 
         # Retourner la poubelle si aucun équipement disponible n'est trouvé pour des cas
-        if closest is None and (self.__chef.has_potato() or self.__chef.has_raw_patty()):
+        if closest is None and (self.__chef.has_potato_slices() or self.__chef.has_raw_patty()):
             return self.__trash
         else:
             return closest
@@ -230,6 +246,8 @@ class Game:
             self.interact_with_assembly_station(equipment)
         elif isinstance(equipment, Platter):
             self.interact_with_platter(equipment)
+        elif isinstance(equipment, CuttingStation):
+            self.interact_with_cutting_station(equipment)
         elif isinstance(equipment, Trash):
             self.interact_with_trash(self.__chef)
 
@@ -242,7 +260,7 @@ class Game:
                 self.__chef.grab_food(filling_station.get_beverage())
 
     def interact_with_fryer(self, fryer):
-        if fryer.is_available() and self.__chef.has_potato():
+        if fryer.is_available() and self.__chef.has_potato_slices():
             self.__chef.drop_food()
             fryer.fry()
         elif not self.__chef.food:
@@ -281,6 +299,17 @@ class Game:
 
     def interact_with_orderboard(self, orderboard):
         self.__chef.deliver_meal(orderboard)
+
+
+    def interact_with_cutting_station(self, cutting_station):
+        if self.__chef.has_ingredient_for_cutting() and cutting_station.is_available():
+            cutting_station.start_cutting(self.__chef.food)
+            self.__chef.drop_food()
+        elif cutting_station.is_ready():
+            cut_ingredient = cutting_station.get_cut_ingredient()
+            if cut_ingredient:
+                self.__chef.grab_food(cut_ingredient)
+
 
     def __handle_pygame_events(self) -> None:
         """
@@ -345,6 +374,8 @@ class Game:
         assembly_station = pygame.sprite.spritecollideany(self.__chef, self.__assembly_stations_group)
         platter = pygame.sprite.spritecollideany(self.__chef, self.__platters_group)
         trash = pygame.sprite.collide_rect(self.__chef, self.__trash)
+        cutting_station = pygame.sprite.spritecollideany(self.__chef, self.__cutting_stations_group)
+
 
         # Vérifier les interactions directes avec chaque type d'équipement
         if filling_station:
@@ -357,18 +388,7 @@ class Game:
             self.interact_with_grill(grill)
             interacted = True
         elif fridge:
-            only_equipement = None
-            if self.__chef.has_raw_patty():
-                only_equipement = list(self.__grills_group)
-            elif self.__chef.has_potato():
-                only_equipement = list(self.__fryers_group)
-
-            if only_equipement:
-                closest_equipment = self.get_closest_available_equipment(only_equipement)
-                if closest_equipment:
-                    self.interact_with_closest_equipment(closest_equipment)
-            else:
-                self.interact_with_fridge(fridge)
+            self.interact_with_fridge(fridge)
             interacted = True
         elif assembly_station:
             self.interact_with_assembly_station(assembly_station)
@@ -379,6 +399,23 @@ class Game:
         elif trash:
             self.interact_with_trash(self.__chef)
             interacted = True
+        elif cutting_station:
+        ########################################## A5 ##########################################
+            only_equipement = None
+            if self.__chef.has_raw_patty():
+                only_equipement = list(self.__grills_group)
+            elif self.__chef.has_potato_slices():
+                only_equipement = list(self.__fryers_group)
+
+            if only_equipement:
+                closest_equipment = self.get_closest_available_equipment(only_equipement)
+                if closest_equipment:
+                    self.interact_with_closest_equipment(closest_equipment)
+            else:
+                self.interact_with_cutting_station(cutting_station)
+            interacted = True
+        ########################################## A5 ##########################################
+        
         else:
             self.interact_with_orderboard(self.__order_board)
 

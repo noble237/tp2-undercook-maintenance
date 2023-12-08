@@ -21,7 +21,11 @@ def __undercooked() -> None:
     """ La source de tous les maux. """
 
     pygame.init()
-    screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.FULLSCREEN)
+
+    display_info = pygame.display.Info()
+    screen_width, screen_height = display_info.current_w, display_info.current_h
+
+    screen = pygame.display.set_mode((screen_width, screen_height), pygame.NOFRAME)
     pygame.display.set_caption('Undercooked')
     pygame.mouse.set_visible(False)
 
