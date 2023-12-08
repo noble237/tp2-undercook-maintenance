@@ -19,6 +19,8 @@ class Fridge(pygame.sprite.Sprite):
         super().__init__()
 
         self.__ingredient = ingredient
+        self.__fridge_type = ingredient.ingredient_type()
+
 
         self.image = self.__build_surface()
 
@@ -31,10 +33,21 @@ class Fridge(pygame.sprite.Sprite):
         Récupère un ingrédient du réfrigérateur sous forme de nourriture.
         :return: un des ingrédients réfrigérés
         """
+        
         return self.__ingredient
+    
+    ########################################## A3 #########################################
+
+    def can_return_ingredient(self, ingredient: Ingredient) -> bool:
+        if self.__fridge_type != ingredient.ingredient_type():
+            return False
+        
+        return True
+    
+    ########################################## A3 #########################################
 
 
-    ########################################## C4 ##########################################
+    ########################################## C4 #########################################
     
     def __build_surface(self) -> pygame.Surface:
         """

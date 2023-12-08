@@ -276,7 +276,12 @@ class Game:
             self.__chef.grab_food(food)
 
     def interact_with_fridge(self, fridge):
-        self.__chef.grab_food(fridge.get_food())
+        if self.__chef.food and fridge.can_return_ingredient(self.__chef.food):
+            self.__chef.drop_food()
+        else:
+            if not self.__chef.food:
+                self.__chef.grab_food(fridge.get_food())
+
 
     def interact_with_assembly_station(self, assembly_station):
         if self.__chef.food:
@@ -415,7 +420,7 @@ class Game:
                 self.interact_with_cutting_station(cutting_station)
             interacted = True
         ########################################## A5 ##########################################
-        
+
         else:
             self.interact_with_orderboard(self.__order_board)
 
