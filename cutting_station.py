@@ -56,8 +56,8 @@ class CuttingStation(pygame.sprite.Sprite):
         """
         if self.__state == CuttingStation.__STATE_READY:
             self.__state = CuttingStation.__STATE_EMPTY
-            cut_ingredient = self.__ingredient
-            self.__ingredient = None
+            cut_ingredient, self.__ingredient = self.__ingredient, None
+
             self.image = self.__build_surface()
             return cut_ingredient
 
@@ -82,7 +82,7 @@ class CuttingStation(pygame.sprite.Sprite):
 
     def __build_surface(self) -> pygame.Surface:
         """
-        Construit l'image représentant la station de découpage avec un motif en damier rouge et blanc.
+        Construit l'image représentant la station de découpage avec un motif.
         :return: image de la station
         """
         surface = pygame.Surface((60, 60), flags=pygame.SRCALPHA)

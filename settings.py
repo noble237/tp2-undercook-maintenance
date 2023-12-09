@@ -54,3 +54,6 @@ FILLING_STATION_NOZZLE_COLOR = 150, 150, 150
 # couleurs pour les cutting stations
 CUTTING_STATION_COLOR = 135, 50, 170
 CUTTING_STATION_DARK_COLOR = 70, 70, 70
+
+# couleurs pour la surcuisson
+BURNT_PATTY_COLOR = 45, 25, 15

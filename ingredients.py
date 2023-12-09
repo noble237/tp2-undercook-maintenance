@@ -26,6 +26,7 @@ class IngredientType(Enum):
     TOMATO_SLICES = auto(),
     PICKLE_SLICE = auto(),
     POTATO_SLICES = auto(),
+    BURNT_PATTY = auto(),
 
 
 class Ingredient(Food):
@@ -42,11 +43,11 @@ class Ingredient(Food):
                      IngredientType.BOTTOM_BUN: (settings.BUN_COLOR, 32, 6),
                      IngredientType.TOP_BUN: (settings.BUN_COLOR, 32, 8),
                      IngredientType.COOKED_PATTY: (settings.COOKED_PATTY_COLOR, 32, 6),
+                     IngredientType.BURNT_PATTY: (settings.BURNT_PATTY_COLOR, 32, 6),
                      IngredientType.CHEESE_SLICE: (settings.CHEESE_COLOR, 32, 1),
                      IngredientType.ONION_SLICES: (settings.ONIONS_COLOR, 32, 3),
                      IngredientType.LETTUCE_SLICES: (settings.LETTUCE_COLOR, 32, 3),
                      IngredientType.TOMATO_SLICES: (settings.TOMATO_COLOR, 32, 3),
-
                      ########################################## C5 ##########################################
                      IngredientType.PICKLE_SLICE: (settings.PICKLE_COLOR, 32, 3), # Changement a 32
                      ########################################## C5 ##########################################
@@ -116,6 +117,11 @@ class Ingredient(Food):
                 pygame.draw.rect(surface, self.__color, rect)
                 rect = pygame.Rect((pos[0], pos[1] + 1), (32, self.__height - 2))
                 pygame.draw.rect(surface, self.__color, rect)
+            case IngredientType.BURNT_PATTY:
+                rect = pygame.Rect((pos[0] + 2, pos[1]), (28, self.__height))
+                pygame.draw.rect(surface, self.__color, rect)
+                rect = pygame.Rect((pos[0], pos[1] + 1), (32, self.__height - 2))
+                pygame.draw.rect(surface, self.__color, rect)
             case IngredientType.CHEESE_SLICE:
                 rect = pygame.Rect((pos[0], pos[1]), (32, 1))
                 pygame.draw.rect(surface, self.__color, rect)
@@ -133,7 +139,7 @@ class Ingredient(Food):
 
             case IngredientType.POTATO_SLICES:
                 base_color = settings.POTATO_COLOR
-                for i in range(random.randint(5, 10)):
+                for _ in range(random.randint(5, 10)):
                     x = pos[0] + random.randint(0, 20)
                     y = pos[1] + random.randint(-5, 5)
 

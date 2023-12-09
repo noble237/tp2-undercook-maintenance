@@ -117,8 +117,6 @@ class Game:
 
         self.__chef = Chef((screen.get_width() / 2, screen.get_height() / 2))
 
-
-
         self.__cutting_stations_group = pygame.sprite.Group()
         self.__cutting_stations = [
             CuttingStation((settings.SCREEN_WIDTH - (CuttingStation.WIDTH + 200), ((300 + 700) // 2) + (i - 1) * 70))
@@ -156,7 +154,6 @@ class Game:
         self.__screen.fill((0, 120, 200))
 
         self.__trash.draw(self.__screen)
-
         self.__platters_group.draw(self.__screen)
         self.__filling_stations_group.draw(self.__screen)
         self.__fryers_group.draw(self.__screen)
@@ -265,7 +262,6 @@ class Game:
             fryer.fry()
         elif not self.__chef.food:
             self.__chef.grab_food(fryer.get_fries())
-        
 
     def interact_with_grill(self, grill):
         if grill.is_available() and self.__chef.has_raw_patty():
@@ -274,6 +270,10 @@ class Game:
         elif grill.has_cooked_patty() and not self.__chef.food:
             food = grill.get_patty()
             self.__chef.grab_food(food)
+        elif grill.has_overcooked_or_burnt_patty() and not self.__chef.food:
+            food = grill.get_patty()
+            self.__chef.grab_food(food)
+            self.__chef.drop_food()
 
     def interact_with_fridge(self, fridge):
         if self.__chef.food and fridge.can_return_ingredient(self.__chef.food):

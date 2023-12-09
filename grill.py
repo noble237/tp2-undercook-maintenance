@@ -19,6 +19,9 @@ class Grill(pygame.sprite.Sprite):
     COOKING_TICK = 0.20  # en secondes
     COOKING_STEPS = 30
 
+    OVERCOOKING_TICK = 0.20
+    OVERCOOKING_STEPS = 30
+
     def __init__(self, pos: tuple) -> None:
         """
         Initialise le grill.
@@ -27,6 +30,8 @@ class Grill(pygame.sprite.Sprite):
         super().__init__()
 
         self.__cooking = False
+        self.__overcooking = False
+        self.__burnt = False
 
         self.__patty = None
         self.__patty_color = settings.RAW_PATTY_COLOR
@@ -44,7 +49,7 @@ class Grill(pygame.sprite.Sprite):
         :param ingredient: boulette de viande crue
         :return: aucun
         """
-        if self.__cooking:
+        if self.__cooking or self.__overcooking or self.__burnt:
             return
 
         if not ingredient or ingredient.ingredient_type() != IngredientType.RAW_PATTY:
@@ -58,43 +63,50 @@ class Grill(pygame.sprite.Sprite):
         cooking_thread = threading.Thread(target=self.__cook)
         cooking_thread.start()
 
-    def __cooking_done(self) -> None:
-        """
-        Finalise la cuisson d'une boulette.
-        :return: aucun
-        """
-        self.patty_color = settings.COOKED_PATTY_COLOR
-        self.__patty = Ingredient(IngredientType.COOKED_PATTY)
-        self.cooking = False
-        self.image = self.__build_surface()
-
-    def get_patty(self) -> Food or None:
-        """
-        Récupère une boulette qui est sur le grill sous forme de nourriture.
-        :return: boulette s'il y en a une, None sinon
-        """
-        ingredient, self.__patty = self.__patty, None
-        self.image = self.__build_surface()
-        return ingredient
 
     def has_cooked_patty(self) -> bool:
         """
         Vérifie si une boulette cuite se trouve sur le grill.
         :return: True si une boulette cuite est sur le grill, False sinon
         """
-        return not self.cooking and self.__patty
+        return not self.cooking and self.__patty and not self.__overcooking and not self.__burnt
+    
+
+    def has_overcooked_or_burnt_patty(self) -> bool:
+        """
+        Vérifie si une boulette est surcuite ou brûlée se trouve sur le grill.
+        :return: True si une boulette surcuite ou brûlée est sur le grill, False sinon
+        """
+        return not self.cooking and self.__patty and self.__overcooking or self.__burnt
+
 
     def is_available(self) -> bool:
         """
         Vérifie si le grill est disponible pour la cuisson d'une nouvelle boulette.
         :return: True si on peut cuire une boulette, False sinon
         """
-        return not self.cooking and not self.__patty
+        return not self.__cooking and not self.__patty and not self.__overcooking and not self.__burnt
+    
 
     def update(self):
         """ Met à jour l'apparence du grill en fonction de son état actuel. """
-        if self.cooking:
+        if self.__cooking or self.__overcooking or self.__burnt:
             self.image = self.__build_surface()
+
+
+    def get_patty(self) -> Food or None:
+        if self.__patty:
+            if self.__overcooking:
+                self.__overcooking = False
+            if self.__burnt:
+                self.__burnt = False
+            grilled_patty, self.__patty = self.__patty, None
+            self.image = self.__build_surface()
+
+            return grilled_patty
+        
+        return None
+
 
     def __build_surface(self) -> pygame.Surface:
         """
@@ -112,6 +124,7 @@ class Grill(pygame.sprite.Sprite):
             pygame.draw.circle(surface, self.__patty_color, (25, 25), 16)
 
         return surface
+    
 
     def __cook(self) -> None:
         """
@@ -137,6 +150,58 @@ class Grill(pygame.sprite.Sprite):
             self.patty_color = color
 
         self.__cooking_done()
+
+
+    def __cooking_done(self) -> None:
+        """
+        Finalise la cuisson d'une boulette.
+        :return: aucun
+        """
+        self.patty_color = settings.COOKED_PATTY_COLOR
+        self.__patty = Ingredient(IngredientType.COOKED_PATTY)
+        self.cooking = False
+        self.image = self.__build_surface()
+
+        overcooking_thread = threading.Thread(target=self.__overcook)
+        overcooking_thread.start()
+
+
+    def __overcook(self) -> None:
+        if self.__patty is None or not self.__patty.ingredient_type() == IngredientType.COOKED_PATTY:
+            return
+
+        cooked = settings.COOKED_PATTY_COLOR
+        red, green, blue = float(cooked[0]), float(cooked[1]), float(cooked[2])
+        burnt = settings.BURNT_PATTY_COLOR
+
+        red_step = (red - burnt[0]) / Grill.OVERCOOKING_STEPS
+        green_step = (green - burnt[1]) / Grill.OVERCOOKING_STEPS
+        blue_step = (blue - burnt[2]) / Grill.OVERCOOKING_STEPS
+
+        for _ in range(Grill.OVERCOOKING_STEPS):
+            if self.__patty is None:
+                return
+        
+            time.sleep(Grill.OVERCOOKING_TICK)
+            red -= red_step
+            green -= green_step
+            blue -= blue_step
+            self.patty_color = round(red), round(green), round(blue)
+
+        if  self.__patty:
+            self.__burnt = True
+            self.__overcooking_done()
+
+
+    def __overcooking_done(self) -> None:
+        """
+        Finalise la surcuisson d'une boulette.
+        :return: aucun
+        """
+        self.patty_color = settings.BURNT_PATTY_COLOR
+        self.__patty = Ingredient(IngredientType.BURNT_PATTY)
+        self.image = self.__build_surface()
+
 
     @property
     def cooking(self) -> bool:
