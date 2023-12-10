@@ -57,6 +57,10 @@ class Burger(Food):
             return ingredient.ingredient_type() == IngredientType.BOTTOM_BUN
         elif ingredient.ingredient_type() == IngredientType.BOTTOM_BUN:
             return False
+        
+        # Le deuxième ingrédient doit être un COOKED_PATTY
+        if len(self.__ingredients) == 1:
+            return ingredient.ingredient_type() == IngredientType.COOKED_PATTY
 
         # Empêcher l'ajout de tout autre ingrédient si un TOP_BUN est déjà présent
         # seulement un seul TOP_BUN est autorisé
@@ -72,9 +76,8 @@ class Burger(Food):
         # Ajouter CHEESE_SLICE ou autre ingrédient uniquement si le dernier ingrédient est COOKED_PATTY
         if ingredient.ingredient_type() == IngredientType.CHEESE_SLICE:
             return len(self.__ingredients) > 0 and self.__ingredients[-1].ingredient_type() == IngredientType.COOKED_PATTY
-        elif ingredient.ingredient_type() == IngredientType.CHEESE_SLICE:
-            return False
-
+        
+        # Ajouter tout le reste 
 
         return True
 
