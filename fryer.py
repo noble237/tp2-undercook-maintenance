@@ -1,6 +1,7 @@
 import threading
 import time
 import pygame
+import random
 
 from fries import Fries
 import settings
@@ -39,6 +40,7 @@ class Fryer(pygame.sprite.Sprite):
         super().__init__()
 
         self.__fries = None
+        self.__fries_positions = []
         self.__state = Fryer.__STATE_EMPTY_BASKET
         self.image = self.__build_surface()
         
@@ -72,6 +74,14 @@ class Fryer(pygame.sprite.Sprite):
             return fries
 
         return None
+
+    def __generate_fries_positions(self):
+        """ Génère des positions aléatoires pour les frites dans le panier. """
+        self.__fries_positions = []
+        for _ in range(random.randint(5, 10)):
+            x = random.randint(20, 35)
+            y = random.randint(20, 35)
+            self.__fries_positions.append((x, y))
 
 
     def is_available(self) -> bool:
@@ -119,7 +129,11 @@ class Fryer(pygame.sprite.Sprite):
             pygame.draw.rect(surface, settings.FRYER_DARK_COLOR, rect)
         elif self.__state == Fryer.__STATE_FRYING:
             rect = pygame.Rect(10, 10, 30, 30)
-            pygame.draw.rect(surface, settings.FRIES_COLOR, rect)
+            pygame.draw.rect(surface, settings.FRYER_DARK_COLOR, rect)
+
+            for pos in self.__fries_positions:
+                pygame.draw.rect(surface, settings.FRIES_COLOR, (*pos, 3, 3))
+
         elif self.__fries and self.__state in [Fryer.__STATE_FRIES_READY, Fryer.__STATE_OVERFRYING, Fryer.__STATE_BURNT]:
             self.__fries.draw(surface, (12, 10))
 
@@ -127,10 +141,13 @@ class Fryer(pygame.sprite.Sprite):
 
 
     def __fry(self) -> None:
-        """
-        Procède à la cuisson des frites.
-        """
-        time.sleep(Fryer.__FRYING_TIME)
+        """ Procède à la cuisson des frites avec des mises à jour de position. """
+
+        self.__generate_fries_positions()
+        for _ in range(int(Fryer.__FRYING_TIME)):
+            time.sleep(1)
+            self.__generate_fries_positions()
+            self.image = self.__build_surface()
 
         self.__state = Fryer.__STATE_FRIES_READY
         self.image = self.__build_surface()
@@ -138,13 +155,19 @@ class Fryer(pygame.sprite.Sprite):
         overfrying_thread = threading.Thread(target=self.__overfry)
         overfrying_thread.start()
 
-    def __overfry(self) -> None:
-        if self.__fries is None:
-            return
 
-        time.sleep(Fryer.__OVERFRYING_TIME)
-        self.__state = Fryer.__STATE_OVERFRYING
-        self.image = self.__build_surface()
+    def __overfry(self) -> None:
+        """ Procède à la surcuisson des frites. """
+
+        start_time = time.time()
+        while time.time() - start_time < Fryer.__OVERFRYING_TIME:
+            if self.__fries is None:
+                return
+            time.sleep(0.1)
+
+        if self.__fries:
+            self.__state = Fryer.__STATE_OVERFRYING
+            self.image = self.__build_surface()
 
         cooked = settings.FRIES_COLOR
         red, green, blue = float(cooked[0]), float(cooked[1]), float(cooked[2])

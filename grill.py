@@ -167,10 +167,9 @@ class Grill(pygame.sprite.Sprite):
 
 
     def __overcook(self) -> None:
-        if self.__patty is None:
-            return
-        
-        for _ in range(Grill.OVERCOOKING_STEPS):
+
+        start_time = time.time()
+        while time.time() - start_time < Grill.OVERCOOKING_TICK * Grill.OVERCOOKING_STEPS:
             if self.__patty is None:
                 return
             time.sleep(Grill.OVERCOOKING_TICK)
@@ -190,16 +189,16 @@ class Grill(pygame.sprite.Sprite):
         for _ in range(Grill.OVERCOOKING_STEPS):
             if self.__patty is None:
                 return
-        
+
             time.sleep(Grill.OVERCOOKING_TICK)
             red -= red_step
             green -= green_step
             blue -= blue_step
 
-            if  self.__patty:
+            if self.__patty:
                 self.patty_color = round(red), round(green), round(blue)
 
-        if  self.__patty:
+        if self.__patty:
             self.__burnt = True
             self.__overcooking_done()
 
