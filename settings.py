@@ -57,3 +57,4 @@ CUTTING_STATION_DARK_COLOR = 70, 70, 70
 
 # couleurs pour la surcuisson
 BURNT_PATTY_COLOR = 45, 25, 15
+BURNT_FRIES_COLOR = 100, 55, 0

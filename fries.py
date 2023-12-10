@@ -20,6 +20,7 @@ class Fries(Food):
 
         self.__width = 26
         self.__height = 36
+        self.__color = settings.FRIES_COLOR
 
     def draw(self, surface: pygame.Surface, pos: tuple) -> None:
         """
@@ -38,11 +39,11 @@ class Fries(Food):
         pygame.draw.rect(surface, settings.HOLDER_COLOR, rect)
 
         rect = pygame.Rect((x + 6, y + 2), (14, 14))
-        pygame.draw.rect(surface, settings.FRIES_COLOR, rect)
+        pygame.draw.rect(surface, self.__color, rect)
         rect = pygame.Rect((x + 2, y + 4), (22, 10))
-        pygame.draw.rect(surface, settings.FRIES_COLOR, rect)
+        pygame.draw.rect(surface, self.__color, rect)
         rect = pygame.Rect((x + 14, y), (4, 2))
-        pygame.draw.rect(surface, settings.FRIES_COLOR, rect)
+        pygame.draw.rect(surface, self.__color, rect)
 
     def height(self) -> int:
         return self.__height
@@ -61,3 +62,12 @@ class Fries(Food):
             return cls()
 
         return None
+    
+
+    @property
+    def color(self):
+        return self.__color
+
+    @color.setter
+    def color(self, value):
+        self.__color = value

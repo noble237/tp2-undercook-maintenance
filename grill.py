@@ -17,10 +17,10 @@ class Grill(pygame.sprite.Sprite):
     HEIGHT = 50
 
     COOKING_TICK = 0.20  # en secondes
-    COOKING_STEPS = 30
+    COOKING_STEPS = 20
 
-    OVERCOOKING_TICK = 0.20
-    OVERCOOKING_STEPS = 30
+    OVERCOOKING_TICK = 0.10  # en secondes
+    OVERCOOKING_STEPS = 100
 
     def __init__(self, pos: tuple) -> None:
         """
@@ -167,12 +167,21 @@ class Grill(pygame.sprite.Sprite):
 
 
     def __overcook(self) -> None:
-        if self.__patty is None or not self.__patty.ingredient_type() == IngredientType.COOKED_PATTY:
+        if self.__patty is None:
             return
+        
+        for _ in range(Grill.OVERCOOKING_STEPS):
+            if self.__patty is None:
+                return
+            time.sleep(Grill.OVERCOOKING_TICK)
+
+        self.__overcooking = True
 
         cooked = settings.COOKED_PATTY_COLOR
         red, green, blue = float(cooked[0]), float(cooked[1]), float(cooked[2])
         burnt = settings.BURNT_PATTY_COLOR
+
+        assert(red >= burnt[0] and green >= burnt[1] and blue >= burnt[2])
 
         red_step = (red - burnt[0]) / Grill.OVERCOOKING_STEPS
         green_step = (green - burnt[1]) / Grill.OVERCOOKING_STEPS
@@ -186,7 +195,9 @@ class Grill(pygame.sprite.Sprite):
             red -= red_step
             green -= green_step
             blue -= blue_step
-            self.patty_color = round(red), round(green), round(blue)
+
+            if  self.__patty:
+                self.patty_color = round(red), round(green), round(blue)
 
         if  self.__patty:
             self.__burnt = True

@@ -256,12 +256,18 @@ class Game:
             else:
                 self.__chef.grab_food(filling_station.get_beverage())
 
+
     def interact_with_fryer(self, fryer):
         if fryer.is_available() and self.__chef.has_potato_slices():
             self.__chef.drop_food()
             fryer.fry()
-        elif not self.__chef.food:
-            self.__chef.grab_food(fryer.get_fries())
+        elif fryer.has_fryed_fries() and not self.__chef.food:
+            food = fryer.get_fries()
+            self.__chef.grab_food(food)
+        elif fryer.has_overfryed_or_burnt_fries() and not self.__chef.food:
+            food = fryer.get_fries()
+            self.__chef.grab_food(food)
+            self.__chef.drop_food()
 
     def interact_with_grill(self, grill):
         if grill.is_available() and self.__chef.has_raw_patty():
