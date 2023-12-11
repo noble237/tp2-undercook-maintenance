@@ -182,7 +182,8 @@ class Chef(pygame.sprite.Sprite):
         :param direction: -1 pour gauche, 1 pour droite
         """
         self.__walking = direction, self.__walking[1]
-        self.__facing = Chef.__FACING_LEFT if direction < 0 else Chef.__FACING_RIGHT
+        if direction != 0:
+            self.__facing = Chef.__FACING_LEFT if direction < 0 else Chef.__FACING_RIGHT
 
     def move_vertical(self, direction):
         """
@@ -190,7 +191,9 @@ class Chef(pygame.sprite.Sprite):
         :param direction: -1 pour haut, 1 pour bas
         """
         self.__walking = self.__walking[0], direction
-        self.__facing = Chef.__FACING_UP if direction < 0 else Chef.__FACING_DOWN
+        if direction != 0:
+            self.__facing = Chef.__FACING_UP if direction < 0 else Chef.__FACING_DOWN
+
 
     ########################################## C2 et C3 ##########################################
 
