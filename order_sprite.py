@@ -73,7 +73,15 @@ class OrderSprite(pygame.sprite.Sprite):
         pygame.draw.rect(surface, (0, 0, 0), rect)
         w = round(48 * self.__time_percentage / 100.0)
         rect = pygame.Rect(6, 6, w, 6)
-        pygame.draw.rect(surface, (0, 255, 0), rect)
+        
+        if self.__time_percentage < 25:
+            color = (255, 0, 0)  # Rouge
+        elif self.__time_percentage < 50:
+            color = (255, 255, 0)  # Jaune
+        else:
+            color = (0, 255, 0)  # Vert
+            
+        pygame.draw.rect(surface, color, rect)
         return surface
 
     def __draw_beverage(self, surface: pygame.Surface) -> None:
