@@ -128,6 +128,8 @@ class Game:
             pygame.K_w: (self.__chef_two, 'up')
         }
 
+        self.total_tips = 0
+
 
     def run(self) -> None:
         """ Boucle de jeu. """
@@ -168,6 +170,12 @@ class Game:
         self.__assembly_stations_group.draw(self.__screen)
         self.__order_board.draw(self.__screen)
         self.__cutting_stations_group.draw(self.__screen)
+
+        tip_info = f"Total de pourboire(s): {self.total_tips}$"
+        tip_surface = self.__font.render(tip_info, True, (255, 255, 255))
+        self.__screen.blit(tip_surface, (self.__screen.get_width() / 2 - tip_surface.get_width() / 2, 10))
+
+
         self.__chef_one.draw(self.__screen)
         self.__chef_two.draw(self.__screen)
 
@@ -316,7 +324,11 @@ class Game:
         chef.drop_food()
 
     def interact_with_orderboard(self, orderboard):
-        self.__chef.deliver_meal(orderboard)
+        delivered_order = self.__chef.deliver_meal(orderboard)
+        if delivered_order:
+            tip = delivered_order.calculate_tip()
+            self.total_tips += tip
+
 
 
     def interact_with_cutting_station(self, cutting_station):

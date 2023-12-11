@@ -63,6 +63,22 @@ class Order(Thread):
     def has_expired(self) -> bool:
         return self.__remaining_time == 0
 
+    def calculate_tip(self) -> float:
+        base_tip = 1
+        item_bonus = 2
+
+        items_count = 1  # Il y a toujours un burger
+        if self.__fries is not None:
+            items_count += 1
+        if self.__beverage is not None:
+            items_count += 1
+
+        time_bonus = self.get_remaining_time_percentage() / (10 * items_count)
+
+        tip = base_tip + items_count * item_bonus + time_bonus
+        return round(tip, 2)
+
+
     @property
     def beverage(self) -> Beverage or None:
         return self.__beverage

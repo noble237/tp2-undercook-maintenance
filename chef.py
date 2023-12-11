@@ -51,26 +51,27 @@ class Chef(pygame.sprite.Sprite):
 
     ########################################## C1 ##########################################
 
-    def deliver_meal(self, order_board: OrderBoard) -> bool:
+    def deliver_meal(self, order_board: OrderBoard) -> Order or None:
         """
         Livre un repas.
         :param order_board: le tableau des commandes en attente
-        :return: True si la livraison est réussie, False sinon
+        :return: la commande si la livraison est réussie, None sinon
         """
+
         if not self.__food:
-            return False
+            return None
 
         if not isinstance(self.__food, Meal):
-            return False
+            return None
 
-        if order := order_board.collides_with(self):
-            # Vérifie si le repas correspond à la commande
-            if self.matches_order(self.__food, order):
-                order_board.remove_order(order.order_id)
-                self.drop_food()
-                return True
+        order = order_board.collides_with(self)
+        if order and self.matches_order(self.__food, order):
+            order_board.remove_order(order.order_id)
+            self.drop_food()
+            return order
 
-        return False
+        return None
+
 
     def matches_order(self, meal: Meal, order: Order) -> bool:
         """
