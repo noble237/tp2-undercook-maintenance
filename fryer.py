@@ -48,6 +48,18 @@ class Fryer(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
+    def reset(self):
+        """
+        Réinitialise la friteuse à son état initial.
+        """
+     
+        self.__fries = None
+        self.__fries_positions = []
+        
+        self.__state = Fryer.__STATE_EMPTY_BASKET
+        self.image = self.__build_surface()
+
+
     def fry(self) -> None:
         """
         Commence à frire des frites. La cuisson (friture) prend un certain temps. 

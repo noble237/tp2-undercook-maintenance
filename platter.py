@@ -33,6 +33,18 @@ class Platter(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
+    def reset(self):
+        """
+        Réinitialise l'assiette de service à son état initial.
+        """
+
+        self.__burger = None
+        self.__beverage = None
+        self.__fries = None
+
+        self.image = self.__build_surface()
+
+
     def add_food(self, food: Food) -> bool:
         """
         Ajoute de la nourriture à l'assiette de service pour confectionner un repas.

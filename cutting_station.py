@@ -36,6 +36,16 @@ class CuttingStation(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
+    def reset(self):
+        """
+        Réinitialise la station de découpe à son état initial.
+        """
+
+        self.__ingredient = None
+        self.__state = CuttingStation.__STATE_EMPTY
+        self.image = self.__build_surface()
+
+
     def start_cutting(self, ingredient: Ingredient) -> None:
         """
         Commence la découpe de l'ingrédient.

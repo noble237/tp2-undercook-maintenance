@@ -42,6 +42,21 @@ class Grill(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
+    def reset(self):
+        """
+        Réinitialise le grill à son état initial.
+        """
+
+        self.__cooking = False
+        self.__overcooking = False
+        self.__burnt = False
+
+        self.__patty = None
+        self.__patty_color = settings.RAW_PATTY_COLOR
+
+        self.image = self.__build_surface()
+
+
     def cook(self, ingredient: Ingredient) -> None:
         """
         Débute la cuisson d'une boulette. Si l'ingrédient fourni n'est pas une boulette, rien ne se produit.

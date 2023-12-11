@@ -129,10 +129,11 @@ class Game:
         }
 
         self.total_tips = 0
+        self.__missed_orders = 0
 
 
-    def run(self) -> None:
-        """ Boucle de jeu. """
+    def run(self) -> bool:
+        """ Boucle de jeu. Retourne True si le joueur veut quitter, False pour redémarrer. """
 
         orders.spawner.start()
 
@@ -143,6 +144,8 @@ class Game:
             self.__draw()
 
         orders.spawner.stop()
+        return self.user_requested_quit()
+
 
     def __update(self) -> None:
         """ Mises à jour à effectuer à chaque trame. """
@@ -155,6 +158,13 @@ class Game:
         self.__cutting_stations_group.update()
         self.__chef_one.update()
         self.__chef_two.update()
+
+        expired_orders = self.__order_board.get_expired_orders()
+        for _ in expired_orders:
+            self.__missed_orders += 1
+            if self.__missed_orders >= 3:
+                self.__show_game_over_screen()
+                self.__reset_game()
 
 
     def __draw(self) -> None:
@@ -170,18 +180,35 @@ class Game:
         self.__assembly_stations_group.draw(self.__screen)
         self.__order_board.draw(self.__screen)
         self.__cutting_stations_group.draw(self.__screen)
+        self.__chef_one.draw(self.__screen)
+        self.__chef_two.draw(self.__screen)
+        self.__show_fps()
+        self.__draw_tips()
+        self.__draw_hearts()
+        
+        pygame.display.flip()
+
+
+    def __draw_tips(self):
+        """ Affiche le total de pourboire(s). """
 
         tip_info = f"Total de pourboire(s): {self.total_tips}$"
         tip_surface = self.__font.render(tip_info, True, (255, 255, 255))
         self.__screen.blit(tip_surface, (self.__screen.get_width() / 2 - tip_surface.get_width() / 2, 10))
 
 
-        self.__chef_one.draw(self.__screen)
-        self.__chef_two.draw(self.__screen)
+    def __draw_hearts(self):
+        """ Affiche les cœurs pour les vies restantes. """
 
-        # self.__show_fps()
+        heart_image = pygame.image.load('img/heart.png').convert_alpha()
+        heart_width = heart_image.get_width()
+        total_heart_width = heart_width * 3
+        start_x = (self.__screen.get_width() - total_heart_width) // 2
+        y = 30
 
-        pygame.display.flip()
+        for i in range(3 - self.__missed_orders):
+            self.__screen.blit(heart_image, (start_x + i * heart_width, y))
+
 
     def __show_fps(self) -> None:
         """ Affiche le nombre de trames par seconde (FPS). """
@@ -189,6 +216,50 @@ class Game:
         text_surface = self.__font.render(info, True, (255, 255, 255))
         pos = self.__screen.get_width() - text_surface.get_width() - 10, 10
         self.__screen.blit(text_surface, pos)
+
+    def __show_game_over_screen(self):
+        """ Affiche l'écran de fin de jeu et attend un moment avant de continuer. """
+
+        game_over_image = pygame.image.load('img/gameover.png').convert_alpha()
+        game_over_settings = pygame.transform.scale(game_over_image, (self.__screen.get_width(), self.__screen.get_height()))
+        self.__screen.blit(game_over_settings, (0, 0))
+        pygame.display.flip()
+        pygame.time.wait(settings.IMAGES_TRANSITION_TIME_MS)
+
+    def __reset_game(self):
+        """ Réinitialise le jeu pour un nouveau départ. """
+        self.__missed_orders = 0
+        self.total_tips = 0
+
+    def __reset_game(self):
+        """ Réinitialise le jeu pour un nouveau départ. """
+
+        for grill in self.__grills:
+            grill.reset()
+        for fryer in self.__fryers:
+            fryer.reset()
+        for filling_station in self.__filling_stations:
+            filling_station.reset()
+        for assembly_station in self.__assembly_stations:
+            assembly_station.reset()
+        for cutting_station in self.__cutting_stations:
+            cutting_station.reset()
+        for platter in self.__platters:
+            platter.reset()
+
+        self.__order_board.reset()
+
+        initial_position_chef_one = (self.__screen.get_width() * (1.9/4), self.__screen.get_height() * (2/4))
+        initial_position_chef_two = (self.__screen.get_width() * (2.1/4), self.__screen.get_height() * (2/4))
+        self.__chef_one.reset(initial_position_chef_one)
+        self.__chef_two.reset(initial_position_chef_two)
+
+        self.total_tips = 0
+        self.__missed_orders = 0
+
+
+    def user_requested_quit(self):
+        return not self.__running
 
     def __handle_orders(self) -> None:
         """

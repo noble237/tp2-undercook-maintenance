@@ -18,6 +18,22 @@ class OrderBoard:
 
         self.__waiting_orders_sprite_group = pygame.sprite.Group()
         self.__waiting_orders = []
+        self.__expired_orders = []
+
+    def reset(self):
+        """
+        Réinitialise le tableau d'affichage des commandes.
+        Supprime toutes les commandes en attente et expirées, 
+        et réinitialise l'état des sprites associés.
+        """
+
+        for _, order_sprite in self.__waiting_orders:
+            order_sprite.kill()
+        self.__waiting_orders.clear()
+        self.__expired_orders.clear()
+        self.__left_pos = OrderBoard.__LEFT_OFFSET
+        self.__pack()
+
 
     def __del__(self) -> None:
         """
@@ -88,11 +104,20 @@ class OrderBoard:
         # retirer les commandes expirées
         for order, _ in self.__waiting_orders:
             if order.has_expired():
+                self.__expired_orders.append(order)
                 self.remove_order(order.order_id)
 
         # mettre à jour tous les sprites
         for _, order_sprite in self.__waiting_orders:
             order_sprite.update()
+
+    def get_expired_orders(self):
+        """
+        Retourne une liste des commandes expirées.
+        :return: Liste des commandes expirées
+        """
+        expired_orders, self.__expired_orders = self.__expired_orders, []
+        return expired_orders
 
     def __pack(self) -> None:
         """

@@ -35,6 +35,15 @@ class FillingStation(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
+    def reset(self):
+        """
+        Réinitialise la station de remplissage à son état initial.
+        """
+       
+        self.__state = FillingStation.__STATE_NO_CUP
+        self.image = self.__build_surface()
+
+
     def fill(self) -> None:
         """
         Débute le remplissage d'une boisson. Le remplissage prend un certain temps et n'est pas complété au retour

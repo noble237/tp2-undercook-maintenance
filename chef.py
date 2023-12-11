@@ -47,7 +47,33 @@ class Chef(pygame.sprite.Sprite):
 
         self.__sprite_group = pygame.sprite.GroupSingle()
         self.__sprite_group.add(self)
+
+    def reset(self):
+        """
+        Réinitialise le chef à son état initial.
+        """
+
+        self.drop_food()
+        self.rect.x, self.rect.y = self.__initial_position
+
+        self.is_moving_left = self.is_moving_right = False
+        self.is_moving_up = self.is_moving_down = False
+
     
+    def reset(self, initial_position: tuple):
+        """
+        Réinitialise le chef à son état initial.
+        :param initial_position: position initiale du chef à l'écran
+        """
+
+        self.rect.x, self.rect.y = initial_position
+
+        self.__facing = Chef.__FACING_DOWN
+        self.is_moving_up = self.is_moving_down = False
+        self.is_moving_left = self.is_moving_right = False
+        self.drop_food()
+
+        self.image = self.__surfaces[self.__facing]
 
     ########################################## C1 ##########################################
 

@@ -27,6 +27,14 @@ class AssemblyStation(pygame.sprite.Sprite):
         self.rect.x = pos[0] - self.rect.width / 2
         self.rect.y = pos[1] - self.rect.height / 2
 
+    def reset(self):
+        """
+        Réinitialise la station d'assemblage à son état initial.
+        """
+        
+        self.__burger = None
+        self.image = self.__build_surface()
+
 
     ########################################## A1 ##########################################
 

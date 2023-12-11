@@ -17,6 +17,11 @@ import settings
 from game import Game
 
 
+import os
+import pygame
+import settings
+from game import Game
+
 def __undercooked() -> None:
     """ La source de tous les maux. """
 
@@ -29,18 +34,21 @@ def __undercooked() -> None:
     pygame.display.set_caption('Undercooked')
     pygame.mouse.set_visible(False)
 
-    title_screen = pygame.image.load('img/undercooked1.png')
-    title_settings = pygame.transform.scale(title_screen, (screen_width, screen_height))
-    screen.blit(title_settings, (0, 0))
-    pygame.display.flip()
+    while True:
+        title_screen = pygame.image.load('img/undercooked1.png')
+        title_settings = pygame.transform.scale(title_screen, (screen_width, screen_height))
+        screen.blit(title_settings, (0, 0))
+        pygame.display.flip()
 
-    pygame.time.wait(2000)
+        pygame.time.wait(settings.IMAGES_TRANSITION_TIME_MS)
 
-    game = Game(screen)
-    game.run()
+        game = Game(screen)
+        game.run()
+
+        if game.user_requested_quit():
+            break
 
     pygame.quit()
-
 
 if __name__ == '__main__':
     try:
