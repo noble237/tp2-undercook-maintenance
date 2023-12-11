@@ -29,10 +29,16 @@ def __undercooked() -> None:
     pygame.display.set_caption('Undercooked')
     pygame.mouse.set_visible(False)
 
+    title_screen = pygame.image.load('img/undercooked1.png')
+    screen.blit(title_screen, (0, 0))
+    pygame.display.flip()
+    pygame.time.delay(2000)
+    
     game = Game(screen)
     game.run()
 
     pygame.quit()
+
 
 
 if __name__ == '__main__':
