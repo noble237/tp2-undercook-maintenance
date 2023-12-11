@@ -52,6 +52,22 @@ class OrderSprite(pygame.sprite.Sprite):
             self.__previous_time_percentage = self.__time_percentage
             self.image = self.__build_surface()
 
+    def get_color_from_percentage(self, percentage: float) -> tuple:
+        """
+        Retourne une couleur allant du vert au rouge en fonction du pourcentage.
+        Vert à 100%, jaune à 50%, rouge à 0%.
+        """
+        if percentage > 50:
+            # Du vert (0, 255, 0) au jaune (255, 255, 0)
+            red = round(255 * (2 * (1 - (percentage / 100.0))))
+            green = 255
+        else:
+            # Du jaune (255, 255, 0) au rouge (255, 0, 0)
+            red = 255
+            green = round(255 * (percentage / 50.0))
+
+        return red, green, 0
+
     def __build_surface(self) -> pygame.Surface:
         """
         Construit l'image représentant la commande. Va inclure le contenu de la commande et un
@@ -74,14 +90,9 @@ class OrderSprite(pygame.sprite.Sprite):
         w = round(48 * self.__time_percentage / 100.0)
         rect = pygame.Rect(6, 6, w, 6)
         
-        if self.__time_percentage < 25:
-            color = (255, 0, 0)  # Rouge
-        elif self.__time_percentage < 50:
-            color = (255, 255, 0)  # Jaune
-        else:
-            color = (0, 255, 0)  # Vert
-            
-        pygame.draw.rect(surface, color, rect)
+        couleur = self.get_color_from_percentage(self.__time_percentage)
+        pygame.draw.rect(surface, couleur, rect)
+
         return surface
 
     def __draw_beverage(self, surface: pygame.Surface) -> None:

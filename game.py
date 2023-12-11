@@ -117,6 +117,17 @@ class Game:
         self.__chef_two = Chef((screen.get_width() * (2.1/4), screen.get_height() * (2/4)))
         self.__chef = self.__chef_one
 
+        self.__chef_controls = {
+            pygame.K_DOWN: (self.__chef_one, 'down'),
+            pygame.K_LEFT: (self.__chef_one, 'left'),
+            pygame.K_RIGHT: (self.__chef_one, 'right'),
+            pygame.K_UP: (self.__chef_one, 'up'),
+            pygame.K_s: (self.__chef_two, 'down'),
+            pygame.K_a: (self.__chef_two, 'left'),
+            pygame.K_d: (self.__chef_two, 'right'),
+            pygame.K_w: (self.__chef_two, 'up')
+        }
+
 
     def run(self) -> None:
         """ Boucle de jeu. """
@@ -342,11 +353,6 @@ class Game:
 
     ########################################## C3 et C6 ##########################################
     def __handle_keyboard_event(self, event: pygame.event.Event) -> None:
-        """
-        Gère les événements associés aux touches du clavier.
-        :param event: événement du clavier
-        :return: aucun
-        """
 
         if event.type == pygame.KEYDOWN:
             if event.key in [pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP]:
@@ -354,71 +360,32 @@ class Game:
             elif event.key in [pygame.K_s, pygame.K_a, pygame.K_d, pygame.K_w]:
                 self.__chef = self.__chef_two
 
-            if event.key in [pygame.K_s, pygame.K_DOWN]:
-                self.__chef_one.is_moving_down = True if event.key == pygame.K_DOWN else self.__chef_one.is_moving_down
-                self.__chef_two.is_moving_down = True if event.key == pygame.K_s else self.__chef_two.is_moving_down
-            elif event.key in [pygame.K_a, pygame.K_LEFT]:
-                self.__chef_one.is_moving_left = True if event.key == pygame.K_LEFT else self.__chef_one.is_moving_left
-                self.__chef_two.is_moving_left = True if event.key == pygame.K_a else self.__chef_two.is_moving_left
-            elif event.key in [pygame.K_d, pygame.K_RIGHT]:
-                self.__chef_one.is_moving_right = True if event.key == pygame.K_RIGHT else self.__chef_one.is_moving_right
-                self.__chef_two.is_moving_right = True if event.key == pygame.K_d else self.__chef_two.is_moving_right
-            elif event.key in [pygame.K_w, pygame.K_UP]:
-                self.__chef_one.is_moving_up = True if event.key == pygame.K_UP else self.__chef_one.is_moving_up
-                self.__chef_two.is_moving_up = True if event.key == pygame.K_w else self.__chef_two.is_moving_up
-            elif event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE:
                 self.handle_space_key()
 
-        if event.type == pygame.KEYUP:
-            if event.key in [pygame.K_s, pygame.K_DOWN]:
-                self.__chef_one.is_moving_down = False if event.key == pygame.K_DOWN else self.__chef_one.is_moving_down
-                self.__chef_two.is_moving_down = False if event.key == pygame.K_s else self.__chef_two.is_moving_down
-            elif event.key in [pygame.K_a, pygame.K_LEFT]:
-                self.__chef_one.is_moving_left = False if event.key == pygame.K_LEFT else self.__chef_one.is_moving_left
-                self.__chef_two.is_moving_left = False if event.key == pygame.K_a else self.__chef_two.is_moving_left
-            elif event.key in [pygame.K_d, pygame.K_RIGHT]:
-                self.__chef_one.is_moving_right = False if event.key == pygame.K_RIGHT else self.__chef_one.is_moving_right
-                self.__chef_two.is_moving_right = False if event.key == pygame.K_d else self.__chef_two.is_moving_right
-            elif event.key in [pygame.K_w, pygame.K_UP]:
-                self.__chef_one.is_moving_up = False if event.key == pygame.K_UP else self.__chef_one.is_moving_up
-                self.__chef_two.is_moving_up = False if event.key == pygame.K_w else self.__chef_two.is_moving_up
+            chef, direction = self.__chef_controls.get(event.key, (None, None))
+            if chef:
+                self.__update_chef_movement(chef, direction, True)
 
-        self.__update_chef_movement()
+        elif event.type == pygame.KEYUP:
+            chef, direction = self.__chef_controls.get(event.key, (None, None))
+            if chef:
+                self.__update_chef_movement(chef, direction, False)
 
+    def __update_chef_movement(self, chef, direction, is_moving):
 
-    ########################################## C3 ##########################################
-
-    def __update_chef_movement(self):
-        if self.__chef_one.is_moving_left:
-            self.__chef_one.move_horizontal(-1)
-        elif self.__chef_one.is_moving_right:
-            self.__chef_one.move_horizontal(1)
-        else:
-            self.__chef_one.move_horizontal(0)
-
-        if self.__chef_one.is_moving_up:
-            self.__chef_one.move_vertical(-1)
-        elif self.__chef_one.is_moving_down:
-            self.__chef_one.move_vertical(1)
-        else:
-            self.__chef_one.move_vertical(0)
-
-
-        if self.__chef_two.is_moving_left:
-            self.__chef_two.move_horizontal(-1)
-        elif self.__chef_two.is_moving_right:
-            self.__chef_two.move_horizontal(1)
-        else:
-            self.__chef_two.move_horizontal(0)
-
-        if self.__chef_two.is_moving_up:
-            self.__chef_two.move_vertical(-1)
-        elif self.__chef_two.is_moving_down:
-            self.__chef_two.move_vertical(1)
-        else:
-            self.__chef_two.move_vertical(0)
-
-    ########################################## C3 ##########################################
+        if direction == 'left':
+            chef.is_moving_left = is_moving
+            chef.move_horizontal(-1 if is_moving else 0)
+        elif direction == 'right':
+            chef.is_moving_right = is_moving
+            chef.move_horizontal(1 if is_moving else 0)
+        elif direction == 'up':
+            chef.is_moving_up = is_moving
+            chef.move_vertical(-1 if is_moving else 0)
+        elif direction == 'down':
+            chef.is_moving_down = is_moving
+            chef.move_vertical(1 if is_moving else 0)
 
     
     def handle_space_key(self):
