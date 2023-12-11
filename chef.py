@@ -33,6 +33,11 @@ class Chef(pygame.sprite.Sprite):
 
         self.__food = None  # nourriture transportée par le chef cuisinier
 
+        self.is_moving_up = False
+        self.is_moving_down = False
+        self.is_moving_left = False
+        self.is_moving_right = False
+
         self.__surfaces = self.__build_surfaces()
         self.image = self.__surfaces[self.__facing]
 
@@ -98,10 +103,7 @@ class Chef(pygame.sprite.Sprite):
 
         return True
 
-
-
     ########################################## C1 ##########################################
-
 
     def draw(self, surface: pygame.Surface) -> None:
         """
@@ -275,3 +277,35 @@ class Chef(pygame.sprite.Sprite):
     @property
     def food(self) -> Food or None:
         return self.__food
+
+    @property
+    def is_moving_up(self):
+        return self._is_moving_up
+
+    @is_moving_up.setter
+    def is_moving_up(self, value):
+        self._is_moving_up = value
+
+    @property
+    def is_moving_down(self):
+        return self._is_moving_down
+
+    @is_moving_down.setter
+    def is_moving_down(self, value):
+        self._is_moving_down = value
+
+    @property
+    def is_moving_left(self):
+        return self._is_moving_left
+
+    @is_moving_left.setter
+    def is_moving_left(self, value):
+        self._is_moving_left = value
+
+    @property
+    def is_moving_right(self):
+        return self._is_moving_right
+
+    @is_moving_right.setter
+    def is_moving_right(self, value):
+        self._is_moving_right = value

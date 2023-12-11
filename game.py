@@ -37,16 +37,6 @@ class Game:
         self.__screen = screen
         self.__running = False
 
-    ########################################## C3 ##########################################
-
-        self.is_moving_up = False
-        self.is_moving_down = False
-        self.is_moving_left = False
-        self.is_moving_right = False
-
-    ########################################## C3 ##########################################
-
-
         default_font_name = pygame.font.get_default_font()
         self.__font = pygame.font.Font(default_font_name, Game.__DEFAULT_FONT_SIZE)
 
@@ -115,7 +105,6 @@ class Game:
                                     AssemblyStation((800, 500))]
         self.__assembly_stations_group.add(self.__assembly_stations)
 
-        self.__chef = Chef((screen.get_width() / 2, screen.get_height() / 2))
 
         self.__cutting_stations_group = pygame.sprite.Group()
         self.__cutting_stations = [
@@ -123,7 +112,11 @@ class Game:
             for i in range(4)
         ]
         self.__cutting_stations_group.add(self.__cutting_stations)
-        
+
+        self.__chef_one = Chef((screen.get_width() * (1.9/4), screen.get_height() * (2/4)))
+        self.__chef_two = Chef((screen.get_width() * (2.1/4), screen.get_height() * (2/4)))
+        self.__chef = self.__chef_one
+
 
     def run(self) -> None:
         """ Boucle de jeu. """
@@ -147,7 +140,9 @@ class Game:
         self.__grills_group.update()
         self.__fryers_group.update()
         self.__cutting_stations_group.update()
-        self.__chef.update()
+        self.__chef_one.update()
+        self.__chef_two.update()
+
 
     def __draw(self) -> None:
         """ Dessins à effectuer à chaque trame. """
@@ -162,7 +157,8 @@ class Game:
         self.__assembly_stations_group.draw(self.__screen)
         self.__order_board.draw(self.__screen)
         self.__cutting_stations_group.draw(self.__screen)
-        self.__chef.draw(self.__screen)
+        self.__chef_one.draw(self.__screen)
+        self.__chef_two.draw(self.__screen)
 
         # self.__show_fps()
 
@@ -353,28 +349,77 @@ class Game:
         """
 
         if event.type == pygame.KEYDOWN:
+            if event.key in [pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP]:
+                self.__chef = self.__chef_one
+            elif event.key in [pygame.K_s, pygame.K_a, pygame.K_d, pygame.K_w]:
+                self.__chef = self.__chef_two
+
             if event.key in [pygame.K_s, pygame.K_DOWN]:
-                self.is_moving_down = True
+                self.__chef_one.is_moving_down = True if event.key == pygame.K_DOWN else self.__chef_one.is_moving_down
+                self.__chef_two.is_moving_down = True if event.key == pygame.K_s else self.__chef_two.is_moving_down
             elif event.key in [pygame.K_a, pygame.K_LEFT]:
-                self.is_moving_left = True
+                self.__chef_one.is_moving_left = True if event.key == pygame.K_LEFT else self.__chef_one.is_moving_left
+                self.__chef_two.is_moving_left = True if event.key == pygame.K_a else self.__chef_two.is_moving_left
             elif event.key in [pygame.K_d, pygame.K_RIGHT]:
-                self.is_moving_right = True
+                self.__chef_one.is_moving_right = True if event.key == pygame.K_RIGHT else self.__chef_one.is_moving_right
+                self.__chef_two.is_moving_right = True if event.key == pygame.K_d else self.__chef_two.is_moving_right
             elif event.key in [pygame.K_w, pygame.K_UP]:
-                self.is_moving_up = True
+                self.__chef_one.is_moving_up = True if event.key == pygame.K_UP else self.__chef_one.is_moving_up
+                self.__chef_two.is_moving_up = True if event.key == pygame.K_w else self.__chef_two.is_moving_up
             elif event.key == pygame.K_SPACE:
                 self.handle_space_key()
 
         if event.type == pygame.KEYUP:
             if event.key in [pygame.K_s, pygame.K_DOWN]:
-                self.is_moving_down = False
+                self.__chef_one.is_moving_down = False if event.key == pygame.K_DOWN else self.__chef_one.is_moving_down
+                self.__chef_two.is_moving_down = False if event.key == pygame.K_s else self.__chef_two.is_moving_down
             elif event.key in [pygame.K_a, pygame.K_LEFT]:
-                self.is_moving_left = False
+                self.__chef_one.is_moving_left = False if event.key == pygame.K_LEFT else self.__chef_one.is_moving_left
+                self.__chef_two.is_moving_left = False if event.key == pygame.K_a else self.__chef_two.is_moving_left
             elif event.key in [pygame.K_d, pygame.K_RIGHT]:
-                self.is_moving_right = False
+                self.__chef_one.is_moving_right = False if event.key == pygame.K_RIGHT else self.__chef_one.is_moving_right
+                self.__chef_two.is_moving_right = False if event.key == pygame.K_d else self.__chef_two.is_moving_right
             elif event.key in [pygame.K_w, pygame.K_UP]:
-                self.is_moving_up = False
+                self.__chef_one.is_moving_up = False if event.key == pygame.K_UP else self.__chef_one.is_moving_up
+                self.__chef_two.is_moving_up = False if event.key == pygame.K_w else self.__chef_two.is_moving_up
 
         self.__update_chef_movement()
+
+
+    ########################################## C3 ##########################################
+
+    def __update_chef_movement(self):
+        if self.__chef_one.is_moving_left:
+            self.__chef_one.move_horizontal(-1)
+        elif self.__chef_one.is_moving_right:
+            self.__chef_one.move_horizontal(1)
+        else:
+            self.__chef_one.move_horizontal(0)
+
+        if self.__chef_one.is_moving_up:
+            self.__chef_one.move_vertical(-1)
+        elif self.__chef_one.is_moving_down:
+            self.__chef_one.move_vertical(1)
+        else:
+            self.__chef_one.move_vertical(0)
+
+
+        if self.__chef_two.is_moving_left:
+            self.__chef_two.move_horizontal(-1)
+        elif self.__chef_two.is_moving_right:
+            self.__chef_two.move_horizontal(1)
+        else:
+            self.__chef_two.move_horizontal(0)
+
+        if self.__chef_two.is_moving_up:
+            self.__chef_two.move_vertical(-1)
+        elif self.__chef_two.is_moving_down:
+            self.__chef_two.move_vertical(1)
+        else:
+            self.__chef_two.move_vertical(0)
+
+    ########################################## C3 ##########################################
+
     
     def handle_space_key(self):
         interacted = False
@@ -437,22 +482,3 @@ class Game:
                 self.interact_with_closest_equipment(closest_equipment)
 
     ########################################## C3 et C6 ##########################################
-
-    ########################################## C3 ##########################################
-
-    def __update_chef_movement(self):
-        if self.is_moving_left:
-            self.__chef.move_horizontal(-1)
-        elif self.is_moving_right:
-            self.__chef.move_horizontal(1)
-        else:
-            self.__chef.move_horizontal(0)
-
-        if self.is_moving_up:
-            self.__chef.move_vertical(-1)
-        elif self.is_moving_down:
-            self.__chef.move_vertical(1)
-        else:
-            self.__chef.move_vertical(0)
-
-    ########################################## C3 ##########################################
