@@ -63,7 +63,7 @@ class Game:
             BeverageType.LEMONADE, BeverageType.PINK_LEMONADE
         ]
         self.__filling_stations = [
-            FillingStation(liste_brevages[i], (((400 + 800) // 2) + (i - len(liste_brevages) // 2) * self.__spacing, 200))
+            FillingStation(liste_brevages[i], (((400 + 800) / 2) + (i - len(liste_brevages) / 2) * self.__spacing, 200))
             for i in range(len(liste_brevages))
         ]
         self.__filling_stations_group.add(self.__filling_stations)
@@ -71,14 +71,14 @@ class Game:
 
         self.__fryers_group = pygame.sprite.Group()
         self.__fryers = [
-            Fryer((settings.SCREEN_WIDTH - (Fryer.WIDTH + 200), ((317.5 + 400) // 2) + (i - 1) * self.__spacing))
+            Fryer((settings.SCREEN_WIDTH - (Fryer.WIDTH + 200), ((317.5 + 400) / 2) + (i - 1) * self.__spacing))
             for i in range(2)
         ]
         self.__fryers_group.add(self.__fryers)
 
         self.__grills_group = pygame.sprite.Group()
         self.__grills = [
-            Grill((settings.SCREEN_WIDTH - (Grill.WIDTH + 200), ((100 + 250) // 2) + (i - 1) * self.__spacing))
+            Grill((settings.SCREEN_WIDTH - (Grill.WIDTH + 200), ((100 + 250) / 2) + (i - 1) * self.__spacing))
             for i in range(3)
         ]
         self.__grills_group.add(self.__grills)
@@ -92,7 +92,7 @@ class Game:
             IngredientType.UNPREPARED_TOMATO, IngredientType.UNPREPARED_PICKLE, IngredientType.POTATO
         ]
         self.__fridges = [
-            Fridge(Ingredient(liste_ingredients[i]), (((220 + 1020) // 2) + (i - len(liste_ingredients) // 2) * self.__spacing, settings.SCREEN_HEIGHT - 60))
+            Fridge(Ingredient(liste_ingredients[i]), (((220 + 1020) / 2) + (i - len(liste_ingredients) / 2) * self.__spacing, settings.SCREEN_HEIGHT - 60))
             for i in range(len(liste_ingredients))
         ]
         self.__fridges_group.add(self.__fridges)
@@ -108,7 +108,7 @@ class Game:
 
         self.__cutting_stations_group = pygame.sprite.Group()
         self.__cutting_stations = [
-            CuttingStation((settings.SCREEN_WIDTH - (CuttingStation.WIDTH + 200), ((300 + 700) // 2) + (i - 1) * 70))
+            CuttingStation((settings.SCREEN_WIDTH - (CuttingStation.WIDTH + 200), ((300 + 700) / 2) + (i - 1) * 70))
             for i in range(4)
         ]
         self.__cutting_stations_group.add(self.__cutting_stations)
@@ -190,24 +190,36 @@ class Game:
 
 
     def __draw_tips(self):
-        """ Affiche le total de pourboire(s). """
+        """ Affiche le total de pourboire(s) avec un contour noir et un remplissage blanc. """
 
-        tip_info = f"Total de pourboire(s): {self.total_tips}$"
-        tip_surface = self.__font.render(tip_info, True, (255, 255, 255))
-        self.__screen.blit(tip_surface, (self.__screen.get_width() / 2 - tip_surface.get_width() / 2, 10))
+        tip_info = f"Total de pourboire(s): {self.total_tips:.2f}$"
+        text_surface = self.__font.render(tip_info, True, (255, 255, 255))
+        text_x = self.__screen.get_width() / 2 - text_surface.get_width() / 2
+        text_y = 10
 
+        # Dessiner le contour en noir
+        outline_color = (0, 0, 0)
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                if dx != 0 or dy != 0:
+                    self.__screen.blit(self.__font.render(tip_info, True, outline_color), (text_x + dx, text_y + dy))
+
+        self.__screen.blit(text_surface, (text_x, text_y))
 
     def __draw_hearts(self):
         """ Affiche les cœurs pour les vies restantes. """
 
         heart_image = pygame.image.load('img/heart.png').convert_alpha()
         heart_width = heart_image.get_width()
-        total_heart_width = heart_width * 3
-        start_x = (self.__screen.get_width() - total_heart_width) // 2
-        y = 30
+        heart_spacing = 10
+        number_of_hearts = 3 - self.__missed_orders
 
-        for i in range(3 - self.__missed_orders):
-            self.__screen.blit(heart_image, (start_x + i * heart_width, y))
+        total_hearts_width = heart_width * number_of_hearts + heart_spacing * (number_of_hearts - 1)
+        start_x = (self.__screen.get_width() - total_hearts_width) / 2
+
+        for i in range(number_of_hearts):
+            self.__screen.blit(heart_image, (start_x + i * (heart_width + heart_spacing), 35))
+
 
 
     def __show_fps(self) -> None:
@@ -228,11 +240,6 @@ class Game:
 
     def __reset_game(self):
         """ Réinitialise le jeu pour un nouveau départ. """
-        self.__missed_orders = 0
-        self.total_tips = 0
-
-    def __reset_game(self):
-        """ Réinitialise le jeu pour un nouveau départ. """
 
         for grill in self.__grills:
             grill.reset()
@@ -248,6 +255,8 @@ class Game:
             platter.reset()
 
         self.__order_board.reset()
+        orders.spawner.reset()
+
 
         initial_position_chef_one = (self.__screen.get_width() * (1.9/4), self.__screen.get_height() * (2/4))
         initial_position_chef_two = (self.__screen.get_width() * (2.1/4), self.__screen.get_height() * (2/4))
@@ -399,7 +408,7 @@ class Game:
         if delivered_order:
             tip = delivered_order.calculate_tip()
             self.total_tips += tip
-
+            orders.spawner.increase_acceleration(1.2)  # Augmenter de 20%
 
 
     def interact_with_cutting_station(self, cutting_station):

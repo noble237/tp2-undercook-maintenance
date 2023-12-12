@@ -116,6 +116,7 @@ class __OrderSpawner(Thread):
         self.__min_time_between = self.__DEFAULT_MIN_TIME_BETWEEN_ORDERS
         self.__max_time_between = self.__DEFAULT_MAX_TIME_BETWEEN_ORDERS
 
+        self.__acceleration_factor = 1.0
         self.__creating_orders = True  # va créer des incidents seulement si __creating_incidents est True
 
     def run(self) -> None:
@@ -161,6 +162,7 @@ class __OrderSpawner(Thread):
         if not self.__event.is_set():
             self.__queue.put(order)
 
+
     def __create_and_send_next_order(self, min_delay: int, max_delay: int) -> None:
         """
         Crée et envoie la prochaine commande.
@@ -168,13 +170,19 @@ class __OrderSpawner(Thread):
         :param max_delay: délai maximal pour créer la commande
         :return: aucun
         """
-        time_to_order = random.randint(min_delay, max_delay)
+
+        time_to_order = random.uniform(min_delay, max_delay) / self.__acceleration_factor
         self.__event.wait(time_to_order)
 
         if self.__creating_orders:
             self.__queue.put(Order(self.__next_order_id))
             self.__next_order_id += 1
 
+    def increase_acceleration(self, increment: float) -> None:
+        self.__acceleration_factor *= increment
+
+    def reset(self):
+        self.__acceleration_factor = 1.0
 
 # générateur de commandes (singleton implémenté avec un Global Object Pattern de python)
 spawner = None
