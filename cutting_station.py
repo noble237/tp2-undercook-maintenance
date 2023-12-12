@@ -18,7 +18,7 @@ class CuttingStation(pygame.sprite.Sprite):
     __STATE_CUTTING = 1
     __STATE_READY = 2
 
-    __CUTTING_TIME = 3.00  # Temps de découpe en secondes
+    __CUTTING_TIME = 1.50  # Temps de découpe en secondes
 
     def __init__(self, pos: tuple) -> None:
         """
