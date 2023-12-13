@@ -282,11 +282,19 @@ class Game:
         return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
 
     def get_relevant_equipments(self):
-        if self.__chef.has_potato_slices():
+        ingredients_for_cutting = [
+            IngredientType.POTATO,
+            IngredientType.UNPREPARED_ONION,
+            IngredientType.UNPREPARED_LETTUCE,
+            IngredientType.UNPREPARED_TOMATO,
+            IngredientType.UNPREPARED_PICKLE
+        ]
+
+        if self.__chef.has_ingredient(IngredientType.POTATO_SLICES):
             return list(self.__fryers_group)
-        elif self.__chef.has_raw_patty():
+        elif self.__chef.has_ingredient(IngredientType.RAW_PATTY):
             return list(self.__grills_group)
-        elif self.__chef.has_ingredient_for_cutting():
+        elif self.__chef.has_ingredient(ingredients_for_cutting):
             return list(self.__cutting_stations_group)
         else:
             return list(self.__fryers_group) + list(self.__fryers_group) + \
@@ -315,7 +323,7 @@ class Game:
                 closest = equipment
 
         # Retourner la poubelle si aucun équipement disponible n'est trouvé pour des cas
-        if closest is None and (self.__chef.has_potato_slices() or self.__chef.has_raw_patty()):
+        if closest is None and (self.__chef.has_ingredient(IngredientType.POTATO_SLICES) or self.__chef.has_ingredient(IngredientType.RAW_PATTY)):
             return self.__trash
         else:
             return closest
@@ -347,7 +355,7 @@ class Game:
                 self.__chef.grab_food(filling_station.get_beverage())
 
     def interact_with_fryer(self, fryer):
-        if fryer.is_available() and self.__chef.has_potato_slices():
+        if fryer.is_available() and self.__chef.has_ingredient(IngredientType.POTATO_SLICES):
             self.__chef.drop_food()
             fryer.fry()
         elif fryer.has_fryed_fries() and not self.__chef.food:
@@ -406,14 +414,24 @@ class Game:
             self.total_tips += tip
             orders.spawner.increase_acceleration(1.2)  # Augmenter de 20%
 
+
     def interact_with_cutting_station(self, cutting_station):
-        if self.__chef.has_ingredient_for_cutting() and cutting_station.is_available():
+        ingredients_for_cutting = [
+            IngredientType.POTATO,
+            IngredientType.UNPREPARED_ONION,
+            IngredientType.UNPREPARED_LETTUCE,
+            IngredientType.UNPREPARED_TOMATO,
+            IngredientType.UNPREPARED_PICKLE
+        ]
+
+        if self.__chef.has_ingredient(ingredients_for_cutting) and cutting_station.is_available():
             cutting_station.start_cutting(self.__chef.food)
             self.__chef.drop_food()
         elif cutting_station.is_ready():
             cut_ingredient = cutting_station.get_cut_ingredient()
             if cut_ingredient:
                 self.__chef.grab_food(cut_ingredient)
+
 
     def __handle_pygame_events(self) -> None:
         """
@@ -511,9 +529,9 @@ class Game:
         elif cutting_station:
         ########################################## A5 ##########################################
             only_equipement = None
-            if self.__chef.has_raw_patty():
+            if self.__chef.has_ingredient(IngredientType.RAW_PATTY):
                 only_equipement = list(self.__grills_group)
-            elif self.__chef.has_potato_slices():
+            elif self.__chef.has_ingredient(IngredientType.POTATO_SLICES):
                 only_equipement = list(self.__fryers_group)
 
             if only_equipement:

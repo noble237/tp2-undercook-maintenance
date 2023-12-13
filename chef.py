@@ -1,7 +1,6 @@
 import pygame
-
 import settings
-
+from typing import Union, List
 from food import Food
 from ingredients import Ingredient, IngredientType
 from meal import Meal
@@ -159,23 +158,13 @@ class Chef(pygame.sprite.Sprite):
             self.__food = food
             self.__surfaces = self.__build_surfaces(self.__food)
 
-    def has_potato_slices(self) -> bool:
-        """
-        Vérifie si le chef cuisinier tient une patate dans ses mains.
-        :return: True si le chef cuisinier tient une patate, False sinon
-        """
-        if not self.__food:
-            return False
+    ########################################## R2 ##########################################
 
-        if not isinstance(self.__food, Ingredient):
-            return False
-
-        return self.__food.ingredient_type() == IngredientType.POTATO_SLICES
-
-    def has_raw_patty(self) -> bool:
+    def has_ingredient(self, ingredient_type: Union[IngredientType, List[IngredientType]]) -> bool:
         """
-        Vérifie si le chef cuisinier tient une boulette de viande crue dans ses mains.
-        :return: True si le chef cuisinier tient une boulette de viande crue, False sinon
+        Vérifie si le chef tient un ou plusieurs ingrédients spécifiques.
+        :param ingredient_type: Le type d'ingrédient ou une liste de types d'ingrédients à vérifier.
+        :return: True si le chef tient l'un des ingrédients spécifiés, False sinon.
         """
         if not self.__food:
             return False
@@ -183,25 +172,15 @@ class Chef(pygame.sprite.Sprite):
         if not isinstance(self.__food, Ingredient):
             return False
 
-        return self.__food.ingredient_type() == IngredientType.RAW_PATTY
+        if isinstance(ingredient_type, IngredientType):
+            return self.__food.ingredient_type() == ingredient_type
+        elif isinstance(ingredient_type, list):
+            return self.__food.ingredient_type() in ingredient_type
+
+        return False
     
+    ########################################## R2 ##########################################
 
-    ########################################## A5 ##########################################
-
-    def has_ingredient_for_cutting(self) -> bool:
-        """
-        Vérifie si le chef cuisinier tient une boulette de viande crue dans ses mains.
-        :return: True si le chef cuisinier tient une boulette de viande crue, False sinon
-        """
-        if not self.__food:
-            return False
-
-        if not isinstance(self.__food, Ingredient):
-            return False
-
-        return self.__food.is_for_cutting()
-    
-    ########################################## A5 ##########################################
 
     def move_horizontal(self, direction):
         """
