@@ -56,7 +56,12 @@ class Fryer(pygame.sprite.Sprite):
         self.__fries = None
         self.__fries_positions = []
         
-        self.__state = Fryer.__STATE_EMPTY_BASKET
+        self.__update_state(Fryer.__STATE_EMPTY_BASKET)
+
+
+    def __update_state(self, new_state):
+        """ Met à jour l'état de la friteuse et rafraîchit son image. """
+        self.__state = new_state
         self.image = self.__build_surface()
 
 
@@ -67,9 +72,7 @@ class Fryer(pygame.sprite.Sprite):
         """
         if self.__state == Fryer.__STATE_EMPTY_BASKET:
             self.__fries = Fries()
-
-            self.__state = Fryer.__STATE_FRYING
-            self.image = self.__build_surface()
+            self.__update_state(Fryer.__STATE_FRYING)
 
             frying_thread = threading.Thread(target=self.__fry)
             frying_thread.start()
@@ -81,8 +84,7 @@ class Fryer(pygame.sprite.Sprite):
         """
         if self.__state in [Fryer.__STATE_FRIES_READY, Fryer.__STATE_OVERFRYING, Fryer.__STATE_BURNT]:
             fries, self.__fries = self.__fries, None
-            self.__state = Fryer.__STATE_EMPTY_BASKET
-            self.image = self.__build_surface()
+            self.__update_state(Fryer.__STATE_EMPTY_BASKET)
             return fries
 
         return None
@@ -161,8 +163,7 @@ class Fryer(pygame.sprite.Sprite):
             self.__generate_fries_positions()
             self.image = self.__build_surface()
 
-        self.__state = Fryer.__STATE_FRIES_READY
-        self.image = self.__build_surface()
+        self.__update_state(Fryer.__STATE_FRIES_READY)
 
         overfrying_thread = threading.Thread(target=self.__overfry)
         overfrying_thread.start()
@@ -178,8 +179,7 @@ class Fryer(pygame.sprite.Sprite):
             time.sleep(0.1)
 
         if self.__fries:
-            self.__state = Fryer.__STATE_OVERFRYING
-            self.image = self.__build_surface()
+            self.__update_state(Fryer.__STATE_OVERFRYING)
 
         cooked = settings.FRIES_COLOR
         red, green, blue = float(cooked[0]), float(cooked[1]), float(cooked[2])
@@ -205,5 +205,4 @@ class Fryer(pygame.sprite.Sprite):
                 self.image = self.__build_surface()
 
         if self.__fries:
-            self.__state = Fryer.__STATE_BURNT
-            self.image = self.__build_surface()
+            self.__update_state(Fryer.__STATE_BURNT)
