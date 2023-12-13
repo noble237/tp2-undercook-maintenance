@@ -56,6 +56,28 @@ class Grill(pygame.sprite.Sprite):
 
         self.image = self.__build_surface()
 
+    ########################################## R1 ##########################################
+
+    def start_cooking(self, ingredient: Ingredient):
+        """ Commence à cuire un ingrédient. """
+        if not self.is_available() or ingredient.ingredient_type() != IngredientType.RAW_PATTY:
+            return False
+        self.cook(ingredient)
+        return True
+
+    def get_cooked_patty(self):
+        """ Récupère une boulette cuite si disponible. """
+        if self.has_cooked_patty():
+            return self.get_patty()
+        return None
+
+    def get_overcooked_or_burnt_patty(self):
+        """ Récupère une boulette surcuite ou brûlée si disponible. """
+        if self.has_overcooked_or_burnt_patty():
+            return self.get_patty()
+        return None
+
+    ########################################## R1 ##########################################
 
     def cook(self, ingredient: Ingredient) -> None:
         """

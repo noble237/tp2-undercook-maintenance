@@ -1,6 +1,7 @@
 import pygame
-
 import settings
+import orders
+import math
 from assembly_station import AssemblyStation
 from filling_station import FillingStation
 from fridge import Fridge
@@ -10,15 +11,9 @@ from platter import Platter
 from trash import Trash
 from chef import Chef
 from order_board import OrderBoard
-
 from beverage import BeverageType
 from ingredients import Ingredient, IngredientType
-
-import orders
-import math
-
 from cutting_station import CuttingStation
-
 
 
 class Game:
@@ -351,7 +346,6 @@ class Game:
             else:
                 self.__chef.grab_food(filling_station.get_beverage())
 
-
     def interact_with_fryer(self, fryer):
         if fryer.is_available() and self.__chef.has_potato_slices():
             self.__chef.drop_food()
@@ -365,16 +359,19 @@ class Game:
             self.__chef.drop_food()
 
     def interact_with_grill(self, grill):
-        if grill.is_available() and self.__chef.has_raw_patty():
-            food = self.__chef.drop_food()
-            grill.cook(food)
-        elif grill.has_cooked_patty() and not self.__chef.food:
-            food = grill.get_patty()
-            self.__chef.grab_food(food)
-        elif grill.has_overcooked_or_burnt_patty() and not self.__chef.food:
-            food = grill.get_patty()
-            self.__chef.grab_food(food)
-            self.__chef.drop_food()
+        if self.__chef.food:
+            if grill.start_cooking(self.__chef.food):
+                self.__chef.drop_food()
+        else:
+            if grill.has_cooked_patty():
+                cooked_patty = grill.get_cooked_patty()
+                if cooked_patty:
+                    self.__chef.grab_food(cooked_patty)
+            elif grill.has_overcooked_or_burnt_patty():
+                burnt_patty = grill.get_overcooked_or_burnt_patty()
+                if burnt_patty:
+                    self.__chef.grab_food(burnt_patty)
+                    self.__chef.drop_food()
 
     def interact_with_fridge(self, fridge):
         if self.__chef.food and fridge.can_return_ingredient(self.__chef.food):
@@ -382,7 +379,6 @@ class Game:
         else:
             if not self.__chef.food:
                 self.__chef.grab_food(fridge.get_food())
-
 
     def interact_with_assembly_station(self, assembly_station):
         if self.__chef.food:
@@ -410,7 +406,6 @@ class Game:
             self.total_tips += tip
             orders.spawner.increase_acceleration(1.2)  # Augmenter de 20%
 
-
     def interact_with_cutting_station(self, cutting_station):
         if self.__chef.has_ingredient_for_cutting() and cutting_station.is_available():
             cutting_station.start_cutting(self.__chef.food)
@@ -419,7 +414,6 @@ class Game:
             cut_ingredient = cutting_station.get_cut_ingredient()
             if cut_ingredient:
                 self.__chef.grab_food(cut_ingredient)
-
 
     def __handle_pygame_events(self) -> None:
         """
