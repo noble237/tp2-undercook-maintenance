@@ -44,7 +44,7 @@ class Ingredient(Food):
                      IngredientType.TOP_BUN: (settings.BUN_COLOR, 32, 8),
                      IngredientType.COOKED_PATTY: (settings.COOKED_PATTY_COLOR, 32, 6),
                      IngredientType.BURNT_PATTY: (settings.BURNT_PATTY_COLOR, 32, 6),
-                     IngredientType.CHEESE_SLICE: (settings.CHEESE_COLOR, 32, 1),
+                     IngredientType.CHEESE_SLICE: (settings.CHEESE_COLOR, 32, 6),
                      IngredientType.ONION_SLICES: (settings.ONIONS_COLOR, 32, 3),
                      IngredientType.LETTUCE_SLICES: (settings.LETTUCE_COLOR, 32, 3),
                      IngredientType.TOMATO_SLICES: (settings.TOMATO_COLOR, 32, 3),
@@ -83,80 +83,75 @@ class Ingredient(Food):
         self.__color, self.__width, self.__height = Ingredient.__INGREDIENTS[self.__type]
 
     def draw(self, surface: pygame.Surface, pos: tuple) -> None:
-        """
-        Dessine l'ingrédient sur la surface spécifiée à la position donnée.
-        :param surface: surface sur laquelle dessiner l'ingrédient
-        :param pos: position où dessiner l'ingrédient sur la surface
-        :return: aucun
-        """
-        match self.__type:
-            case IngredientType.POTATO:
-                x = pos[0] + round(self.__width / 2.0)
-                y = pos[1] + round(self.__height / 2.0)
-                r = round(self.__width / 2.0)
-                pygame.draw.circle(surface, self.__color, (x, y), r)
-            case IngredientType.RAW_PATTY:
-                rect = pygame.Rect((pos[0] + 2, pos[1]), (28, self.__height))
-                pygame.draw.rect(surface, self.__color, rect)
-                rect = pygame.Rect((pos[0], pos[1] + 1), (32, self.__height - 2))
-                pygame.draw.rect(surface, self.__color, rect)
-            case IngredientType.BOTTOM_BUN:
-                rect = pygame.Rect((pos[0], pos[1]), (32, self.__height / 2))
-                pygame.draw.rect(surface, self.__color, rect)
-                rect = pygame.Rect((pos[0] + 2, pos[1] + self.__height / 2), (28, self.__height / 2))
-                pygame.draw.rect(surface, self.__color, rect)
-            case IngredientType.TOP_BUN:
-                rect = pygame.Rect((pos[0] + 6, pos[1]), (20, self.__height / 4))
-                pygame.draw.rect(surface, self.__color, rect)
-                rect = pygame.Rect((pos[0] + 2, pos[1] + self.__height / 4), (28, self.__height / 4))
-                pygame.draw.rect(surface, self.__color, rect)
-                rect = pygame.Rect((pos[0], pos[1] + self.__height / 2), (32, self.__height / 2))
-                pygame.draw.rect(surface, self.__color, rect)
-            case IngredientType.COOKED_PATTY:
-                rect = pygame.Rect((pos[0] + 2, pos[1]), (28, self.__height))
-                pygame.draw.rect(surface, self.__color, rect)
-                rect = pygame.Rect((pos[0], pos[1] + 1), (32, self.__height - 2))
-                pygame.draw.rect(surface, self.__color, rect)
-            case IngredientType.BURNT_PATTY:
-                rect = pygame.Rect((pos[0] + 2, pos[1]), (28, self.__height))
-                pygame.draw.rect(surface, self.__color, rect)
-                rect = pygame.Rect((pos[0], pos[1] + 1), (32, self.__height - 2))
-                pygame.draw.rect(surface, self.__color, rect)
-            case IngredientType.CHEESE_SLICE:
-                rect = pygame.Rect((pos[0], pos[1]), (32, 1))
-                pygame.draw.rect(surface, self.__color, rect)
-                rect = pygame.Rect((pos[0] + 4, pos[1] + 1), (24, 1))
-                pygame.draw.rect(surface, self.__color, rect)
-                rect = pygame.Rect((pos[0] + 8, pos[1] + 2), (16, 1))
-                pygame.draw.rect(surface, self.__color, rect)
-                rect = pygame.Rect((pos[0] + 12, pos[1] + 3), (8, 1))
-                pygame.draw.rect(surface, self.__color, rect)
-            case IngredientType.PICKLE_SLICE:
-                rect = pygame.Rect((pos[0] - 2, pos[1]), (36, self.__height))
-                pygame.draw.rect(surface, self.__color, rect)
+        if self.buffer_surface is None:
+            self.buffer_surface = pygame.Surface((self.width(), self.height()), pygame.SRCALPHA)
+            self.buffer_surface.fill((0, 0, 0, 0))
 
-        ########################################## A5 ##########################################
+            # Dessin de l'ingrédient sur la surface tampon
 
-            case IngredientType.POTATO_SLICES:
-                base_color = settings.POTATO_COLOR
-                for _ in range(random.randint(5, 10)):
-                    x = pos[0] + random.randint(0, 20)
-                    y = pos[1] + random.randint(-5, 5)
+            match self.__type:
+                case IngredientType.POTATO:
+                    x = self.__width / 2
+                    y = self.__height / 2
+                    r = self.__width / 2
+                    pygame.draw.circle(self.buffer_surface, self.__color, (x, y), r)
 
-                    width = 2
-                    height = random.randint(5, 20)
+                case IngredientType.RAW_PATTY:
+                    rect = pygame.Rect((2, 0), (28, self.__height))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+                    rect = pygame.Rect((0, 1), (32, self.__height - 2))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
 
-                    color_variation = [random.randint(-10, 10) for _ in range(3)]
-                    frite_color = [max(0, min(255, base_color[i] + color_variation[i])) for i in range(3)]
+                case IngredientType.BOTTOM_BUN:
+                    rect = pygame.Rect((0, 0), (32, self.__height / 2))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+                    rect = pygame.Rect((2, self.__height / 2), (28, self.__height / 2))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
 
-                    frite_rect = pygame.Rect((x, y), (width, height))
-                    pygame.draw.rect(surface, frite_color, frite_rect)
+                case IngredientType.TOP_BUN:
+                    rect = pygame.Rect((6, 0), (20, self.__height / 4))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+                    rect = pygame.Rect((2, self.__height / 4), (28, self.__height / 4))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+                    rect = pygame.Rect((0, self.__height / 2), (32, self.__height / 2))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
 
-        ########################################## A5 ##########################################
+                case IngredientType.COOKED_PATTY | IngredientType.BURNT_PATTY:
+                    rect = pygame.Rect((2, 0), (28, self.__height))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+                    rect = pygame.Rect((0, 1), (32, self.__height - 2))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
 
-            case _:
-                rect = pygame.Rect(pos, (32, self.__height))
-                pygame.draw.rect(surface, self.__color, rect)
+                case IngredientType.PICKLE_SLICE:
+                    rect = pygame.Rect((-2, 0), (36, self.__height))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+
+                case IngredientType.CHEESE_SLICE:
+                    rect = pygame.Rect((0, 0), (32, 1))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+                    rect = pygame.Rect((4, 1), (24, 1))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+                    rect = pygame.Rect((8, 2), (16, 1))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+                    rect = pygame.Rect((12, 3), (8, 1))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+
+                case IngredientType.POTATO_SLICES:
+                    for _ in range(random.randint(5, 10)):
+                        x = random.randint(0, 20)
+                        y = random.randint(-5, 5)
+                        width = 2
+                        height = random.randint(5, 20)
+                        color_variation = [random.randint(-10, 10) for _ in range(3)]
+                        frite_color = [max(0, min(255, settings.POTATO_COLOR[i] + color_variation[i])) for i in range(3)]
+                        frite_rect = pygame.Rect((x, y), (width, height))
+                        pygame.draw.rect(self.buffer_surface, frite_color, frite_rect)
+
+                case _:
+                    rect = pygame.Rect((0, 0), (32, self.__height))
+                    pygame.draw.rect(self.buffer_surface, self.__color, rect)
+
+        surface.blit(self.buffer_surface, pos)
         
     def height(self) -> int:
         return self.__height

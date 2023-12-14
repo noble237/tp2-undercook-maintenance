@@ -8,6 +8,9 @@ class Food(ABC):
     Nourriture.
     """
 
+    def __init__(self):
+        self.buffer_surface = None
+
     @abstractmethod
     def draw(self, surface: pygame.Surface, pos: tuple) -> None:
         pass
@@ -19,3 +22,7 @@ class Food(ABC):
     @abstractmethod
     def width(self) -> int:
         pass
+
+    @property
+    def buffer(self):
+        return self.buffer_surface

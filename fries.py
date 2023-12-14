@@ -22,6 +22,7 @@ class Fries(Food):
         self.__height = 36
         self.__color = settings.FRIES_COLOR
 
+
     def draw(self, surface: pygame.Surface, pos: tuple) -> None:
         """
         Dessine le cornet de frites sur la surface spécifiée à la position donnée.
@@ -29,21 +30,30 @@ class Fries(Food):
         :param pos: position où dessiner le cornet de frites
         :return: aucun
         """
-        x, y = pos
 
-        rect = pygame.Rect((x + 2, y + 10), (22, 26))
-        pygame.draw.rect(surface, settings.HOLDER_COLOR, rect)
-        rect = pygame.Rect((x + 1, y + 10), (24, 18))
-        pygame.draw.rect(surface, settings.HOLDER_COLOR, rect)
-        rect = pygame.Rect((x, y + 10), (26, 10))
-        pygame.draw.rect(surface, settings.HOLDER_COLOR, rect)
+        # Dessin des frites sur la surface tampon
 
-        rect = pygame.Rect((x + 6, y + 2), (14, 14))
-        pygame.draw.rect(surface, self.__color, rect)
-        rect = pygame.Rect((x + 2, y + 4), (22, 10))
-        pygame.draw.rect(surface, self.__color, rect)
-        rect = pygame.Rect((x + 14, y), (4, 2))
-        pygame.draw.rect(surface, self.__color, rect)
+        if self.buffer_surface is None:
+            self.buffer_surface = pygame.Surface((self.width(), self.height()), pygame.SRCALPHA)
+            self.buffer_surface.fill((0, 0, 0, 0))  # Remplir avec une couleur transparente
+
+            x, y = 0, 0
+            rect = pygame.Rect((x + 2, y + 10), (22, 26))
+            pygame.draw.rect(self.buffer_surface, settings.HOLDER_COLOR, rect)
+            rect = pygame.Rect((x + 1, y + 10), (24, 18))
+            pygame.draw.rect(self.buffer_surface, settings.HOLDER_COLOR, rect)
+            rect = pygame.Rect((x, y + 10), (26, 10))
+            pygame.draw.rect(self.buffer_surface, settings.HOLDER_COLOR, rect)
+
+            rect = pygame.Rect((x + 6, y + 2), (14, 14))
+            pygame.draw.rect(self.buffer_surface, self.__color, rect)
+            rect = pygame.Rect((x + 2, y + 4), (22, 10))
+            pygame.draw.rect(self.buffer_surface, self.__color, rect)
+            rect = pygame.Rect((x + 14, y), (4, 2))
+            pygame.draw.rect(self.buffer_surface, self.__color, rect)
+
+        surface.blit(self.buffer_surface, pos)
+
 
     def height(self) -> int:
         return self.__height
@@ -71,3 +81,4 @@ class Fries(Food):
     @color.setter
     def color(self, value):
         self.__color = value
+        self.buffer_surface = None

@@ -35,17 +35,18 @@ class Burger(Food):
         self.__width, self.__height = self.__compute_width_and_height()
 
     
-    ########################################## A1 et A2 ##########################################
-
     def add_ingredient(self, ingredient: Ingredient) -> None:
         """
         Ajoute un ingrédient au hambourgeois.
         :param ingredient: ingrédient à ajouter
         :return: aucun
         """
+
         if self.can_add_ingredient(ingredient):
             self.__ingredients.append(ingredient)
             self.__width, self.__height = self.__compute_width_and_height()
+            self.buffer_surface = None
+
 
     def can_add_ingredient(self, ingredient: Ingredient):
         # Vérification si l'ingrédient est autorisé pour les burgers
@@ -77,12 +78,8 @@ class Burger(Food):
         if ingredient.ingredient_type() == IngredientType.CHEESE_SLICE:
             return len(self.__ingredients) > 0 and self.__ingredients[-1].ingredient_type() == IngredientType.COOKED_PATTY
         
-        # Ajouter tout le reste 
-
         return True
 
-
-    ########################################## A1 et A2 ##########################################
 
     def draw(self, surface: pygame.Surface, pos: tuple) -> None:
         """
@@ -91,12 +88,19 @@ class Burger(Food):
         :param pos: position dans la surface où dessiner le hambourgeois
         :return: aucun
         """
-        x = pos[0]
-        y = pos[1] + self.__height
 
-        for ingredient in self.__ingredients:
-            y -= ingredient.height()
-            ingredient.draw(surface, (x, y))
+        # Dessin du burger sur la surface tampon
+
+        if self.buffer_surface is None:
+            self.buffer_surface = pygame.Surface((self.width(), self.height()), pygame.SRCALPHA)
+            self.buffer_surface.fill((0, 0, 0, 0))
+            y = self.height()
+            for ingredient in self.__ingredients:
+                y -= ingredient.height()
+                ingredient.draw(self.buffer_surface, (0, y))
+        
+        surface.blit(self.buffer_surface, pos)
+
 
     def height(self) -> int:
         return self.__height

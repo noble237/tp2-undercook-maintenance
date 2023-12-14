@@ -30,6 +30,7 @@ class Beverage(Food):
                    BeverageType.LEMONADE: settings.LEMONADE_COLOR,
                    BeverageType.PINK_LEMONADE: settings.PINK_LEMONADE_COLOR}
 
+
     def __init__(self, beverage_type: BeverageType) -> None:
         """
         Initialise la boisson.
@@ -50,14 +51,21 @@ class Beverage(Food):
         :param pos: position dans la surface où dessiner la boisson
         :return: aucun
         """
-        rect = pygame.Rect((pos[0] + 2, pos[1]), (20, 40))
-        pygame.draw.rect(surface, settings.CUP_COLOR, rect)
-        rect = pygame.Rect((pos[0] + 1, pos[1]), (22, 30))
-        pygame.draw.rect(surface, settings.CUP_COLOR, rect)
-        rect = pygame.Rect((pos[0], pos[1]), (24, 20))
-        pygame.draw.rect(surface, settings.CUP_COLOR, rect)
+        if self.buffer_surface is None:
+            self.buffer_surface = pygame.Surface((self.width(), self.height()), pygame.SRCALPHA)
+            self.buffer_surface.fill((0, 0, 0, 0))
 
-        pygame.draw.circle(surface, self.__color, (pos[0] + 12, pos[1] + 12), 7)
+            # Dessin de la boisson sur la surface tampon
+            
+            rect = pygame.Rect((2, 0), (20, 40))
+            pygame.draw.rect(self.buffer_surface, settings.CUP_COLOR, rect)
+            rect = pygame.Rect((1, 0), (22, 30))
+            pygame.draw.rect(self.buffer_surface, settings.CUP_COLOR, rect)
+            rect = pygame.Rect((0, 0), (24, 20))
+            pygame.draw.rect(self.buffer_surface, settings.CUP_COLOR, rect)
+            pygame.draw.circle(self.buffer_surface, self.__color, (12, 12), 7)
+
+        surface.blit(self.buffer_surface, pos)
 
     def color(self) -> tuple:
         return self.__color

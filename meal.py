@@ -55,6 +55,24 @@ class Meal(Food):
         rect = pygame.Rect(x, y + self.__height - 8, self.__width, 8)
         pygame.draw.rect(surface, settings.MEAL_COLOR, rect)
 
+    def draw(self, surface: pygame.Surface, pos: tuple) -> None:
+        if self.buffer_surface is None:
+            self.buffer_surface = pygame.Surface((self.width(), self.height()), pygame.SRCALPHA)
+            self.buffer_surface.fill((0, 0, 0, 0))
+
+            # Dessin du meal sur la surface tampon
+            x, y = 0, 0
+            rect = pygame.Rect(x, y, self.__width, 8)
+            pygame.draw.rect(self.buffer_surface, settings.MEAL_COLOR, rect)
+            rect = pygame.Rect(x + 1, y + 8, self.__width - 2, self.__height - 16)
+            pygame.draw.rect(self.buffer_surface, settings.MEAL_COLOR, rect)
+            rect = pygame.Rect(x + 1, y + 12, self.__width - 2, 1)
+            pygame.draw.rect(self.buffer_surface, settings.MEAL_DARK_COLOR, rect)
+            rect = pygame.Rect(x, y + self.__height - 8, self.__width, 8)
+            pygame.draw.rect(self.buffer_surface, settings.MEAL_COLOR, rect)
+
+        surface.blit(self.buffer_surface, pos)
+
     def height(self) -> int:
         return self.__height
 
