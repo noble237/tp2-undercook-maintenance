@@ -7,6 +7,7 @@ from threading import Thread, Event
 from beverage import Beverage
 from burger import Burger
 from fries import Fries
+from meal import Meal
 
 
 ORDER_TICK = 0.20  # en secondes
@@ -30,9 +31,16 @@ class Order(Thread):
 
         self.__order_id = order_id
 
-        self.__burger = Burger.random()
-        self.__beverage = Beverage.random()
-        self.__fries = Fries.random()
+        self.__meal = Meal()
+        burger = Burger.random()
+        if burger:
+            self.__meal.add_burger(burger)
+        beverage = Beverage.random()
+        if beverage:
+            self.__meal.add_beverage(beverage)
+        fries = Fries.random()
+        if fries:
+            self.__meal.add_fries(fries)
 
         self.__expiration_time = random.uniform(Order.__MIN_EXPIRATION_TIME, Order.__MAX_EXPIRATION_TIME)
         self.__remaining_time = self.__expiration_time
@@ -67,29 +75,37 @@ class Order(Thread):
         base_tip = 1
         item_bonus = 2
 
-        items_count = 1  # Il y a toujours un burger
-        if self.__fries is not None:
+        items_count = 0
+        if self.meal.burger is not None:
             items_count += 1
-        if self.__beverage is not None:
+        if self.meal.beverage is not None:
             items_count += 1
+        if self.meal.fries is not None:
+            items_count += 1
+
+        if items_count == 0:
+            return base_tip
 
         time_bonus = self.get_remaining_time_percentage() / (10 * items_count)
 
         tip = base_tip + items_count * item_bonus + time_bonus
         return round(tip, 2)
 
+    @property
+    def meal(self) -> Meal:
+        return self.__meal
 
     @property
     def beverage(self) -> Beverage or None:
-        return self.__beverage
+        return self.__meal.beverage
 
     @property
-    def burger(self) -> Burger:
-        return self.__burger
+    def burger(self) -> Burger or None:
+        return self.__meal.burger
 
     @property
     def fries(self) -> Fries or None:
-        return self.__fries
+        return self.__meal.fries
 
     @property
     def order_id(self) -> int:

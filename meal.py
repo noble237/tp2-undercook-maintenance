@@ -61,6 +61,7 @@ class Meal(Food):
             self.buffer_surface.fill((0, 0, 0, 0))
 
             # Dessin du meal sur la surface tampon
+            
             x, y = 0, 0
             rect = pygame.Rect(x, y, self.__width, 8)
             pygame.draw.rect(self.buffer_surface, settings.MEAL_COLOR, rect)

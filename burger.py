@@ -80,7 +80,6 @@ class Burger(Food):
         
         return True
 
-
     def draw(self, surface: pygame.Surface, pos: tuple) -> None:
         """
         Dessine le hambourgeois sur une surface à la position spécifiée.
@@ -94,13 +93,24 @@ class Burger(Food):
         if self.buffer_surface is None:
             self.buffer_surface = pygame.Surface((self.width(), self.height()), pygame.SRCALPHA)
             self.buffer_surface.fill((0, 0, 0, 0))
-            y = self.height()
-            for ingredient in self.__ingredients:
-                y -= ingredient.height()
-                ingredient.draw(self.buffer_surface, (0, y))
-        
-        surface.blit(self.buffer_surface, pos)
 
+            y = self.height()
+            last_patty_y = 0
+
+            for ingredient in self.__ingredients:
+                if ingredient.ingredient_type() == IngredientType.COOKED_PATTY:
+                    y -= ingredient.height()
+                    last_patty_y = y
+
+                if ingredient.ingredient_type() == IngredientType.CHEESE_SLICE:
+                    # Dessiner le CHEESE_SLICE à la position Y du dernier COOKED_PATTY
+                    ingredient.draw(self.buffer_surface, (0, last_patty_y))
+                else:
+                    if ingredient.ingredient_type() != IngredientType.COOKED_PATTY:
+                        y -= ingredient.height()
+                    ingredient.draw(self.buffer_surface, (0, y))
+
+        surface.blit(self.buffer_surface, pos)
 
     def height(self) -> int:
         return self.__height
